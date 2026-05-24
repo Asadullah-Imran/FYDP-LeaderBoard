@@ -24,7 +24,7 @@ export default function ModelDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editTab, setEditTab] = useState('write'); // 'write' | 'preview'
-  const [imageFile, setImageFile] = useState(null);
+  const [imageFiles, setImageFiles] = useState([]);
   const [editData, setEditData] = useState({
     name: '',
     scoreARI: '',
@@ -131,7 +131,7 @@ export default function ModelDetail() {
       methodologyImages: model.methodologyImages || [],
       githubUrl: model.githubUrl || ''
     });
-    setImageFile(null);
+    setImageFiles([]);
     setIsEditing(true);
     setEditTab('write');
   };
@@ -146,7 +146,14 @@ export default function ModelDetail() {
   };
 
   const handleImageChange = (e) => {
-    setImageFile(e.target.files[0]);
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      setImageFiles((prev) => [...prev, ...filesArray]);
+    }
+  };
+
+  const handleRemoveLocalImage = (indexToRemove) => {
+    setImageFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   const handleSave = async (e) => {
@@ -157,18 +164,22 @@ export default function ModelDetail() {
     try {
       let finalImages = [...editData.methodologyImages];
 
-      // Upload new image if selected
-      if (imageFile) {
-        const imageData = new FormData();
-        imageData.append('image', imageFile);
-        
-        const uploadRes = await axios.post(`${API_URL}/upload`, imageData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`
-          }
+      // Upload new images concurrently if selected
+      if (imageFiles.length > 0) {
+        const uploadPromises = imageFiles.map(async (file) => {
+          const imageData = new FormData();
+          imageData.append('image', file);
+          
+          const uploadRes = await axios.post(`${API_URL}/upload`, imageData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${token}`
+            }
+          });
+          return uploadRes.data.url;
         });
-        finalImages.push(uploadRes.data.url);
+        const uploadedUrls = await Promise.all(uploadPromises);
+        finalImages = [...finalImages, ...uploadedUrls];
       }
 
       const payload = {
@@ -186,7 +197,7 @@ export default function ModelDetail() {
 
       setModel(data);
       setIsEditing(false);
-      setImageFile(null);
+      setImageFiles([]);
     } catch (error) {
       console.error('Error updating model:', error);
       alert('Failed to update model. Please check authorization.');
@@ -570,18 +581,37 @@ export default function ModelDetail() {
                 </div>
               )}
               
+              {imageFiles.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-2">New Images to Upload:</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    {imageFiles.map((file, idx) => {
+                      const localUrl = URL.createObjectURL(file);
+                      return (
+                        <div key={idx} className="relative group border border-outline-border rounded-default overflow-hidden h-24 bg-surface-container-low shadow-sm">
+                          <img src={localUrl} alt={`New Selected Upload ${idx + 1}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveLocalImage(idx)}
+                            className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white hover:text-error-container font-extrabold text-xs cursor-pointer gap-1"
+                          >
+                            <Trash2 className="h-4 w-4 text-error" />
+                            Remove
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <input 
                 type="file" 
                 onChange={handleImageChange} 
                 accept="image/*"
-                className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface text-sm file:mr-4 file:py-1.5 file:px-3.5 file:rounded-default file:border-0 file:text-xs file:font-bold file:bg-primary-container file:text-white hover:file:bg-primary-container/90 transition-colors cursor-pointer"
+                multiple
+                className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface text-sm file:mr-4 file:py-1.5 file:px-3.5 file:rounded-default file:border-0 file:text-xs file:font-bold file:bg-primary-container file:text-white hover:file:bg-primary-container/90 transition-colors cursor-pointer mt-2"
               />
-              {imageFile && (
-                <p className="text-xs text-primary mt-2 font-medium flex items-center gap-1.5">
-                  <Image className="h-4 w-4 animate-pulse" />
-                  ✓ Selected: "{imageFile.name}" (will upload on save)
-                </p>
-              )}
             </div>
 
             <div>

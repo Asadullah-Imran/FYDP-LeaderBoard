@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Check, ChevronsUpDown, Search, Eye, Edit3, UploadCloud, Info, BookOpen, ArrowLeft, Code } from 'lucide-react';
+import { Check, ChevronsUpDown, Search, Eye, Edit3, UploadCloud, Info, BookOpen, ArrowLeft, Code, Trash2, Image } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -19,7 +19,7 @@ export default function SubmitModel() {
     architectureFlow: '',
     githubUrl: '',
   });
-  const [imageFile, setImageFile] = useState(null);
+  const [imageFiles, setImageFiles] = useState([]);
   const [sections, setSections] = useState([]);
   const navigate = useNavigate();
 
@@ -64,7 +64,14 @@ export default function SubmitModel() {
   };
 
   const handleImageChange = (e) => {
-    setImageFile(e.target.files[0]);
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      setImageFiles((prev) => [...prev, ...filesArray]);
+    }
+  };
+
+  const handleRemoveImage = (indexToRemove) => {
+    setImageFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   const handleSubmit = async (e) => {
@@ -74,18 +81,21 @@ export default function SubmitModel() {
     try {
       let imageUrls = [];
       
-      // Upload image if selected
-      if (imageFile) {
-        const imageData = new FormData();
-        imageData.append('image', imageFile);
-        
-        const uploadRes = await axios.post(`${API_URL}/upload`, imageData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`
-          }
+      // Upload images concurrently if selected
+      if (imageFiles.length > 0) {
+        const uploadPromises = imageFiles.map(async (file) => {
+          const imageData = new FormData();
+          imageData.append('image', file);
+          
+          const uploadRes = await axios.post(`${API_URL}/upload`, imageData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${token}`
+            }
+          });
+          return uploadRes.data.url;
         });
-        imageUrls.push(uploadRes.data.url);
+        imageUrls = await Promise.all(uploadPromises);
       }
 
       // Submit model
@@ -310,11 +320,37 @@ export default function SubmitModel() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Methodology Images (Gallery Upload)</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit flex items-center gap-1.5">
+              <Image className="h-4 w-4 text-primary-container" />
+              Methodology Images (Gallery Upload) - Multiple Allowed
+            </label>
+            
+            {imageFiles.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                {imageFiles.map((file, idx) => {
+                  const localUrl = URL.createObjectURL(file);
+                  return (
+                    <div key={idx} className="relative group border border-outline-border rounded-default overflow-hidden h-24 bg-surface-container-low shadow-sm">
+                      <img src={localUrl} alt={`Selected Upload ${idx + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(idx)}
+                        className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white hover:text-error-container font-extrabold text-xs cursor-pointer gap-1"
+                      >
+                        <Trash2 className="h-4 w-4 text-error" />
+                        Remove
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             <input 
               type="file" 
               onChange={handleImageChange} 
               accept="image/*"
+              multiple
               className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface text-sm file:mr-4 file:py-1.5 file:px-3.5 file:rounded-default file:border-0 file:text-xs file:font-bold file:bg-primary-container file:text-white hover:file:bg-primary-container/90 transition-colors cursor-pointer"
             />
           </div>
