@@ -7,7 +7,7 @@ import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import mermaid from 'mermaid';
 import { useAuth } from '../context/AuthContext';
-import { Edit2, Trash2, Check, X, Eye, Edit, ChevronsUpDown, Search, Image } from 'lucide-react';
+import { Edit2, Trash2, Check, X, Eye, Edit3, ChevronsUpDown, Search, Image, ArrowLeft, Cpu, Layers, BookOpen, AlertTriangle } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5050/api';
 
@@ -67,8 +67,18 @@ export default function ModelDetail() {
 
   useEffect(() => {
     if (model?.architectureFlow && !isEditing) {
-      mermaid.initialize({ startOnLoad: true, theme: 'dark' });
-      mermaid.contentLoaded();
+      try {
+        // Initialize mermaid with simple styling compatible with light mode
+        mermaid.initialize({ 
+          startOnLoad: true, 
+          theme: 'neutral',
+          securityLevel: 'loose',
+          fontFamily: 'Inter'
+        });
+        mermaid.contentLoaded();
+      } catch (e) {
+        console.error('Mermaid render error:', e);
+      }
     }
   }, [model, isEditing]);
 
@@ -83,10 +93,30 @@ export default function ModelDetail() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  if (loading) return <div className="text-center text-slate-400 mt-20">Loading model details...</div>;
-  if (!model) return <div className="text-center text-red-400 mt-20">Model not found.</div>;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 space-y-4">
+        <div className="h-10 w-10 border-4 border-primary-container border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-on-surface-variant font-medium text-sm animate-pulse">Loading model blueprint details...</p>
+      </div>
+    );
+  }
 
-  // Determine if active user can manage this model (author or admin)
+  if (!model) {
+    return (
+      <div className="text-center py-16 bg-surface-container-lowest border border-outline-border rounded-lg max-w-md mx-auto p-6 shadow-sm">
+        <AlertTriangle className="h-10 w-10 text-error mx-auto mb-3" />
+        <p className="text-lg font-bold text-on-surface">Benchmark Model Not Found</p>
+        <p className="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
+          The requested submission record does not exist or has been removed from the registry.
+        </p>
+        <Link to="/" className="inline-flex items-center gap-1.5 mt-4 text-xs font-bold text-primary hover:underline">
+          <ArrowLeft className="h-3 w-3" /> Return to Dashboard
+        </Link>
+      </div>
+    );
+  }
+
   const canManage = user && (user._id === model.authorId?._id || user._id === model.authorId || user.role === 'admin');
 
   const startEditing = () => {
@@ -182,17 +212,20 @@ export default function ModelDetail() {
     }
   };
 
-  // Helpers for searchable dropdown in edit mode
   const selectedSection = sections.find(s => s._id === editData.datasetSectionId);
   const filteredSections = sections.filter(section =>
     section.name.toLowerCase().includes(dropdownSearch.toLowerCase())
   );
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-20">
+    <div className="w-full space-y-6 pb-20 max-w-4xl mx-auto">
       <div className="flex justify-between items-center">
-        <Link to="/" className="text-blue-400 hover:text-blue-300 flex items-center gap-2 w-fit font-medium">
-          ← Back to Dashboard
+        <Link 
+          to="/" 
+          className="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1.5 font-bold text-sm"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Dashboard
         </Link>
         
         {/* Author management options */}
@@ -200,311 +233,351 @@ export default function ModelDetail() {
           <div className="flex items-center gap-3">
             <button
               onClick={startEditing}
-              className="flex items-center gap-1.5 bg-blue-600/20 hover:bg-blue-600/90 text-blue-300 hover:text-white px-4 py-2 rounded-lg text-sm transition-all border border-blue-500/30 hover:border-blue-500 cursor-pointer font-semibold shadow-md shadow-blue-900/10"
+              className="flex items-center gap-1.5 bg-surface-container-low hover:bg-surface-container text-on-surface px-4 py-2 rounded-default text-xs md:text-sm font-bold transition-all border border-outline-border cursor-pointer shadow-sm"
             >
-              <Edit2 className="h-4 w-4" />
+              <Edit2 className="h-3.5 w-3.5 text-primary" />
               Edit Model
             </button>
             <button
               onClick={handleDelete}
-              className="flex items-center gap-1.5 bg-red-600/20 hover:bg-red-600/90 text-red-300 hover:text-white px-4 py-2 rounded-lg text-sm transition-all border border-red-500/30 hover:border-red-500 cursor-pointer font-semibold shadow-md shadow-red-900/10"
+              className="flex items-center gap-1.5 bg-error-container/20 hover:bg-error-container hover:text-error text-error px-4 py-2 rounded-default text-xs md:text-sm font-bold transition-all border border-error-container/30 cursor-pointer shadow-sm"
             >
-              <Trash2 className="h-4 w-4" />
-              Delete Model
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete Record
             </button>
           </div>
         )}
       </div>
 
-      <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-2xl relative overflow-hidden transition-colors duration-300">
-        {/* Decorative background element */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
+      <div className="bg-surface-container-lowest rounded-lg p-6 md:p-8 border border-outline-border shadow-sm relative overflow-hidden transition-all duration-300">
+        {/* Visual anchor bar */}
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary to-primary-container"></div>
         
-        <div className="relative z-10">
-          {!isEditing ? (
-            /* STATIC DISPLAY VIEW */
-            <>
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
-                <div>
-                  <h1 className="text-4xl font-extrabold text-slate-850 dark:text-white mb-2">{model.name}</h1>
-                  <p className="text-slate-650 dark:text-slate-400">
-                    Submitted by <span className="text-slate-800 dark:text-slate-300 font-medium">{model.authorId?.name || 'Unknown'}</span> for dataset 
-                    <span className="text-blue-600 dark:text-blue-400 font-medium ml-1">{model.datasetSectionId?.name || 'Deleted Section'}</span>
-                  </p>
+        {!isEditing ? (
+          /* STATIC DISPLAY VIEW */
+          <div className="space-y-10">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-outline-border pb-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary-container/10 text-primary border border-primary-container/20 font-outfit">
+                    Bioinformatics Model
+                  </span>
                 </div>
-                <div className="flex gap-4 self-stretch md:self-auto">
-                  <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-4 text-center min-w-[100px] flex-1 md:flex-none">
-                    <div className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">ARI</div>
-                    <div className="text-2xl font-mono text-blue-600 dark:text-blue-400 font-bold">{model.scoreARI?.toFixed(3)}</div>
-                  </div>
-                  <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-4 text-center min-w-[100px] flex-1 md:flex-none">
-                    <div className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">NMI</div>
-                    <div className="text-2xl font-mono text-emerald-600 dark:text-emerald-400 font-bold">{model.scoreNMI?.toFixed(3)}</div>
+                <h1 className="text-3xl md:text-4xl font-extrabold text-on-surface font-outfit tracking-tight flex items-center gap-2">
+                  <Cpu className="h-8 w-8 text-primary-container" />
+                  {model.name}
+                </h1>
+                <p className="text-sm text-on-surface-variant">
+                  Submitted by <span className="text-on-surface font-bold">{model.authorId?.name || 'Unknown'}</span> for dataset 
+                  <span className="text-primary font-bold ml-1">{model.datasetSectionId?.name || 'Deleted Section'}</span>
+                </p>
+              </div>
+              <div className="flex gap-4 self-stretch md:self-auto">
+                <div className="bg-surface-container-low border border-outline-border rounded-default p-4 text-center min-w-[110px] flex-1 md:flex-none shadow-sm">
+                  <div className="text-[10px] text-primary uppercase font-extrabold tracking-wider mb-1 font-outfit">ARI Score</div>
+                  <div className="text-3xl font-mono text-primary font-extrabold">{model.scoreARI?.toFixed(3)}</div>
+                </div>
+                <div className="bg-surface-container-low border border-outline-border rounded-default p-4 text-center min-w-[110px] flex-1 md:flex-none shadow-sm">
+                  <div className="text-[10px] text-secondary uppercase font-extrabold tracking-wider mb-1 font-outfit">NMI Score</div>
+                  <div className="text-3xl font-mono text-secondary font-extrabold">{model.scoreNMI?.toFixed(3)}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Methodology Prose Section */}
+            <div className="prose max-w-none">
+              <h2 className="text-xl font-bold font-outfit border-b border-outline-border pb-2.5 mb-6 text-on-surface flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary-container" />
+                Mathematical Methodology
+              </h2>
+              <div className="text-on-surface-variant leading-relaxed text-sm space-y-4">
+                <ReactMarkdown 
+                  remarkPlugins={[remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
+                >
+                  {model.descriptionMarkdown}
+                </ReactMarkdown>
+              </div>
+            </div>
+
+            {/* Architecture Flow Diagram */}
+            {model.architectureFlow && (
+              <div className="space-y-4">
+                <h2 className="text-xl font-bold font-outfit border-b border-outline-border pb-2.5 mb-6 text-on-surface flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-primary-container" />
+                  Model Pipeline Graph
+                </h2>
+                <div className="bg-surface-container-low p-6 rounded-default border border-outline-border overflow-x-auto flex justify-center shadow-sm">
+                  <div className="mermaid bg-transparent">
+                    {model.architectureFlow}
                   </div>
                 </div>
               </div>
+            )}
 
-              <div className="prose dark:prose-invert prose-blue max-w-none mt-10">
-                <h2 className="text-2xl font-bold border-b border-slate-200 dark:border-slate-700 pb-2 mb-6 text-slate-850 dark:text-white">Methodology</h2>
-                <div className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                  <ReactMarkdown 
-                    remarkPlugins={[remarkMath]}
-                    rehypePlugins={[rehypeKatex]}
-                  >
-                    {model.descriptionMarkdown}
-                  </ReactMarkdown>
+            {/* Gallery / Methodology Images */}
+            {model.methodologyImages && model.methodologyImages.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-xl font-bold font-outfit border-b border-outline-border pb-2.5 mb-6 text-on-surface flex items-center gap-2">
+                  <Image className="h-5 w-5 text-primary-container" />
+                  Methodology Gallery
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {model.methodologyImages.map((img, idx) => (
+                    <img 
+                      key={idx} 
+                      src={img} 
+                      alt={`Methodology Formulation ${idx + 1}`} 
+                      className="rounded-default border border-outline-border w-full object-cover max-h-80 hover:scale-[1.01] transition-all shadow-sm cursor-zoom-in"
+                    />
+                  ))}
                 </div>
               </div>
+            )}
+          </div>
+        ) : (
+          /* DYNAMIC EDIT FORM VIEW */
+          <form onSubmit={handleSave} className="space-y-6">
+            <div className="flex justify-between items-center border-b border-outline-border pb-4 mb-6">
+              <h2 className="text-xl font-bold text-on-surface font-outfit">Edit Model Submission</h2>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={cancelEditing}
+                  className="flex items-center gap-1.5 bg-surface-container-low hover:bg-surface-container text-on-surface px-3.5 py-1.5 rounded-default text-xs md:text-sm font-bold transition-all border border-outline-border cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex items-center gap-1.5 bg-primary-container hover:bg-primary-container/90 text-white px-4 py-1.5 rounded-default text-xs md:text-sm font-bold transition-all border border-primary-container cursor-pointer shadow-sm disabled:opacity-70"
+                >
+                  <Check className="h-4 w-4" />
+                  {isSaving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
 
-              {model.architectureFlow && (
-                <div className="mt-12">
-                  <h2 className="text-2xl font-bold border-b border-slate-200 dark:border-slate-700 pb-2 mb-6 text-slate-850 dark:text-white">Architecture Flow</h2>
-                  <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-lg border border-slate-200 dark:border-slate-700 overflow-x-auto flex justify-center">
-                    <div className="mermaid">
-                      {model.architectureFlow}
-                    </div>
-                  </div>
-                </div>
-              )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Model Name</label>
+                <input 
+                  type="text" 
+                  name="name" 
+                  value={editData.name} 
+                  onChange={handleEditChange} 
+                  required
+                  className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-semibold"
+                />
+              </div>
+              
+              <div className="relative" ref={dropdownRef}>
+                <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Dataset Section</label>
+                <button
+                  type="button"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="w-full flex items-center justify-between bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface hover:border-primary-container focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-semibold text-left cursor-pointer"
+                >
+                  <span className="truncate">
+                    {selectedSection ? selectedSection.name : 'Select a dataset section...'}
+                  </span>
+                  <ChevronsUpDown className="h-4 w-4 text-on-surface-variant shrink-0 ml-2" />
+                </button>
 
-              {model.methodologyImages && model.methodologyImages.length > 0 && (
-                <div className="mt-12">
-                  <h2 className="text-2xl font-bold border-b border-slate-200 dark:border-slate-700 pb-2 mb-6 text-slate-850 dark:text-white">Gallery</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {model.methodologyImages.map((img, idx) => (
-                      <img 
-                        key={idx} 
-                        src={img} 
-                        alt={`Methodology ${idx + 1}`} 
-                        className="rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 w-full object-cover max-h-80 hover:scale-[1.02] transition-transform cursor-pointer"
+                {dropdownOpen && (
+                  <div className="absolute z-50 mt-1 w-full bg-surface-container-lowest border border-outline-border rounded-default shadow-[0px_4px_20px_rgba(15,23,42,0.08)] overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="p-2.5 border-b border-outline-border flex items-center gap-2 bg-surface-container-low">
+                      <Search className="h-4 w-4 text-on-surface-variant shrink-0" />
+                      <input
+                        type="text"
+                        placeholder="Search dataset sections..."
+                        value={dropdownSearch}
+                        onChange={(e) => setDropdownSearch(e.target.value)}
+                        className="w-full bg-transparent text-sm text-on-surface focus:outline-none placeholder-on-surface-variant/40"
+                        autoFocus
                       />
-                    ))}
+                    </div>
+                    <ul className="max-h-60 overflow-y-auto py-1 divide-y divide-outline-border/50">
+                      {filteredSections.length > 0 ? (
+                        filteredSections.map((section) => {
+                          const isSelected = section._id === editData.datasetSectionId;
+                          return (
+                            <li key={section._id}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditData((prev) => ({ ...prev, datasetSectionId: section._id }));
+                                  setDropdownOpen(false);
+                                  setDropdownSearch('');
+                                }}
+                                className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left transition-colors cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-primary-container/10 text-primary font-bold'
+                                    : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
+                                }`}
+                              >
+                                <span className="truncate">{section.name}</span>
+                                {isSelected && <Check className="h-4 w-4 text-primary shrink-0 ml-2" />}
+                              </button>
+                            </li>
+                          );
+                        })
+                      ) : (
+                        <li className="px-4 py-3 text-xs text-on-surface-variant text-center italic">
+                          No matching sections found
+                        </li>
+                      )}
+                    </ul>
                   </div>
-                </div>
-              )}
-            </>
-          ) : (
-            /* DYNAMIC EDIT FORM VIEW */
-            <form onSubmit={handleSave} className="space-y-6">
-              <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-4 mb-6">
-                <h2 className="text-2xl font-bold text-slate-850 dark:text-white">Edit Model Submission</h2>
-                <div className="flex items-center gap-3">
+                )}
+              </div>
+              
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">ARI Score</label>
+                <input 
+                  type="number" 
+                  step="0.001" 
+                  name="scoreARI" 
+                  value={editData.scoreARI} 
+                  onChange={handleEditChange} 
+                  required
+                  className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">NMI Score</label>
+                <input 
+                  type="number" 
+                  step="0.001" 
+                  name="scoreNMI" 
+                  value={editData.scoreNMI} 
+                  onChange={handleEditChange} 
+                  required
+                  className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant font-outfit flex items-center gap-1.5">
+                  <BookOpen className="h-4 w-4 text-primary-container" />
+                  Description (Markdown + LaTeX)
+                </label>
+                <div className="flex bg-surface-container-low p-0.5 rounded-default border border-outline-border">
                   <button
                     type="button"
-                    onClick={cancelEditing}
-                    className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-250 px-3.5 py-1.5 rounded-lg text-sm transition-colors cursor-pointer font-semibold border border-slate-200 dark:border-slate-600"
+                    onClick={() => setEditTab('write')}
+                    className={`flex items-center gap-1 px-3.5 py-1.5 rounded-default text-xs font-bold cursor-pointer transition-all ${
+                      editTab === 'write'
+                        ? 'bg-primary-container text-white shadow-sm'
+                        : 'text-on-surface-variant hover:text-on-surface'
+                    }`}
                   >
-                    <X className="h-4 w-4" />
-                    Cancel
+                    <Edit3 className="h-3.5 w-3.5" />
+                    Editor
                   </button>
                   <button
-                    type="submit"
-                    disabled={isSaving}
-                    className="flex items-center gap-1 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white px-4 py-1.5 rounded-lg text-sm transition-colors cursor-pointer font-semibold shadow-lg shadow-blue-900/30"
+                    type="button"
+                    onClick={() => setEditTab('preview')}
+                    className={`flex items-center gap-1 px-3.5 py-1.5 rounded-default text-xs font-bold cursor-pointer transition-all ${
+                      editTab === 'preview'
+                        ? 'bg-primary-container text-white shadow-sm'
+                        : 'text-on-surface-variant hover:text-on-surface'
+                    }`}
                   >
-                    <Check className="h-4 w-4" />
-                    {isSaving ? 'Saving...' : 'Save Changes'}
+                    <Eye className="h-3.5 w-3.5" />
+                    Preview
                   </button>
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-755 dark:text-slate-300 mb-2">Model Name</label>
-                  <input 
-                    type="text" name="name" value={editData.name} onChange={handleEditChange} required
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
-                  />
-                </div>
-                
-                <div className="relative" ref={dropdownRef}>
-                  <label className="block text-sm font-medium text-slate-755 dark:text-slate-300 mb-2">Dataset Section</label>
-                  <button
-                    type="button"
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="w-full flex items-center justify-between bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white hover:border-blue-500 focus:outline-none focus:border-blue-500 transition-colors text-left"
-                  >
-                    <span className="truncate">
-                      {selectedSection ? selectedSection.name : 'Select a dataset section...'}
-                    </span>
-                    <ChevronsUpDown className="h-4 w-4 text-slate-450 dark:text-slate-400 shrink-0 ml-2" />
-                  </button>
-
-                  {dropdownOpen && (
-                    <div className="absolute z-50 mt-1 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-lg shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
-                      <div className="p-2 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2 bg-slate-50 dark:bg-slate-955/50">
-                        <Search className="h-4 w-4 text-slate-500 shrink-0" />
-                        <input
-                          type="text"
-                          placeholder="Search dataset sections..."
-                          value={dropdownSearch}
-                          onChange={(e) => setDropdownSearch(e.target.value)}
-                          className="w-full bg-transparent text-sm text-slate-900 dark:text-white focus:outline-none placeholder-slate-500"
-                          autoFocus
-                        />
-                      </div>
-                      <ul className="max-h-60 overflow-y-auto py-1 divide-y divide-slate-100 dark:divide-slate-800/30">
-                        {filteredSections.length > 0 ? (
-                          filteredSections.map((section) => {
-                            const isSelected = section._id === editData.datasetSectionId;
-                            return (
-                              <li key={section._id}>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setEditData((prev) => ({ ...prev, datasetSectionId: section._id }));
-                                    setDropdownOpen(false);
-                                    setDropdownSearch('');
-                                  }}
-                                  className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left transition-colors cursor-pointer ${
-                                    isSelected
-                                      ? 'bg-blue-50 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 font-semibold'
-                                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white'
-                                  }`}
-                                >
-                                  <span className="truncate">{section.name}</span>
-                                  {isSelected && <Check className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0 ml-2" />}
-                                </button>
-                              </li>
-                            );
-                          })
-                        ) : (
-                          <li className="px-4 py-3 text-sm text-slate-500 text-center">
-                            No matching sections found
-                          </li>
-                        )}
-                      </ul>
+              
+              {editTab === 'write' ? (
+                <textarea 
+                  name="descriptionMarkdown" 
+                  value={editData.descriptionMarkdown} 
+                  onChange={handleEditChange} 
+                  required 
+                  rows={8}
+                  className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all font-mono text-sm leading-relaxed"
+                  placeholder="Write description using Markdown and LaTeX..."
+                ></textarea>
+              ) : (
+                <div className="w-full bg-surface-container-low border border-outline-border rounded-default p-6 min-h-[178px] prose dark:prose-invert text-on-surface max-w-none overflow-y-auto">
+                  {editData.descriptionMarkdown.trim() ? (
+                    <div className="leading-relaxed text-sm">
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                      >
+                        {editData.descriptionMarkdown}
+                      </ReactMarkdown>
                     </div>
+                  ) : (
+                    <p className="text-on-surface-variant italic text-xs text-center pt-8">
+                      Nothing to preview. Select editor to write content.
+                    </p>
                   )}
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-755 dark:text-slate-300 mb-2">ARI Score</label>
-                  <input 
-                    type="number" step="0.001" name="scoreARI" value={editData.scoreARI} onChange={handleEditChange} required
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-755 dark:text-slate-300 mb-2">NMI Score</label>
-                  <input 
-                    type="number" step="0.001" name="scoreNMI" value={editData.scoreNMI} onChange={handleEditChange} required
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
-                  />
-                </div>
-              </div>
+              )}
+            </div>
 
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="block text-sm font-medium text-slate-755 dark:text-slate-300">Description (Markdown + LaTeX)</label>
-                  <div className="flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
-                    <button
-                      type="button"
-                      onClick={() => setEditTab('write')}
-                      className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold cursor-pointer transition-all ${
-                        editTab === 'write'
-                          ? 'bg-blue-600 text-white shadow-sm'
-                          : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-                      }`}
-                    >
-                      <Edit className="h-3 w-3" />
-                      Write
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEditTab('preview')}
-                      className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold cursor-pointer transition-all ${
-                        editTab === 'preview'
-                          ? 'bg-blue-600 text-white shadow-sm'
-                          : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-                      }`}
-                    >
-                      <Eye className="h-3 w-3" />
-                      Preview
-                    </button>
-                  </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-2 font-outfit">Methodology Images (Gallery)</label>
+              
+              {editData.methodologyImages.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  {editData.methodologyImages.map((img, idx) => (
+                    <div key={idx} className="relative group border border-outline-border rounded-default overflow-hidden h-24 bg-surface-container-low shadow-sm">
+                      <img src={img} alt={`Methodology Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditData(prev => ({
+                            ...prev,
+                            methodologyImages: prev.methodologyImages.filter((_, i) => i !== idx)
+                          }));
+                        }}
+                        className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white hover:text-error-container font-extrabold text-xs cursor-pointer gap-1"
+                      >
+                        <Trash2 className="h-4 w-4 text-error" />
+                        Remove Image
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                
-                {editTab === 'write' ? (
-                  <textarea 
-                    name="descriptionMarkdown" value={editData.descriptionMarkdown} onChange={handleEditChange} required rows={8}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors font-mono text-sm"
-                    placeholder="Write description using Markdown and LaTeX..."
-                  ></textarea>
-                ) : (
-                  <div className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded-lg p-6 min-h-[178px] prose dark:prose-invert text-slate-750 dark:text-slate-300 max-w-none overflow-y-auto">
-                    {editData.descriptionMarkdown.trim() ? (
-                      <div className="text-slate-700 dark:text-slate-300 leading-relaxed text-sm">
-                        <ReactMarkdown 
-                          remarkPlugins={[remarkMath]}
-                          rehypePlugins={[rehypeKatex]}
-                        >
-                          {editData.descriptionMarkdown}
-                        </ReactMarkdown>
-                      </div>
-                    ) : (
-                      <p className="text-slate-500 italic text-sm text-center pt-8">
-                        Nothing to preview.
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
+              )}
+              
+              <input 
+                type="file" 
+                onChange={handleImageChange} 
+                accept="image/*"
+                className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface text-sm file:mr-4 file:py-1.5 file:px-3.5 file:rounded-default file:border-0 file:text-xs file:font-bold file:bg-primary-container file:text-white hover:file:bg-primary-container/90 transition-colors cursor-pointer"
+              />
+              {imageFile && (
+                <p className="text-xs text-primary mt-2 font-medium flex items-center gap-1.5">
+                  <Image className="h-4 w-4 animate-pulse" />
+                  ✓ Selected: "{imageFile.name}" (will upload on save)
+                </p>
+              )}
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-755 dark:text-slate-300 mb-2">Methodology Images (Gallery)</label>
-                
-                {/* Previews of currently uploaded images */}
-                {editData.methodologyImages.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    {editData.methodologyImages.map((img, idx) => (
-                      <div key={idx} className="relative group border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden h-24 bg-slate-50 dark:bg-slate-900 shadow-md">
-                        <img src={img} alt={`Methodology ${idx + 1}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditData(prev => ({
-                              ...prev,
-                              methodologyImages: prev.methodologyImages.filter((_, i) => i !== idx)
-                            }));
-                          }}
-                          className="absolute inset-0 bg-black/75 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300 font-bold text-xs cursor-pointer gap-1"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Remove Image
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Upload selector for new image */}
-                <input 
-                  type="file" 
-                  onChange={handleImageChange} 
-                  accept="image/*"
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition-colors cursor-pointer"
-                />
-                {imageFile && (
-                  <p className="text-xs text-blue-400 mt-2 font-medium flex items-center gap-1.5">
-                    <Image className="h-4 w-4 text-blue-400 animate-pulse" />
-                    ✓ New image selected: "{imageFile.name}" (will upload on save)
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-755 dark:text-slate-300 mb-2">Architecture Flow (Mermaid.js) - Optional</label>
-                <textarea 
-                  name="architectureFlow" value={editData.architectureFlow} onChange={handleEditChange} rows={4}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors font-mono text-sm"
-                  placeholder="graph TD;&#10;  A-->B;"
-                ></textarea>
-              </div>
-            </form>
-          )}
-        </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Architecture Flow (Mermaid.js Scheme) - Optional</label>
+              <textarea 
+                name="architectureFlow" 
+                value={editData.architectureFlow} 
+                onChange={handleEditChange} 
+                rows={4}
+                className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all font-mono text-xs leading-relaxed"
+                placeholder="graph TD;&#10;  A-->B;"
+              ></textarea>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

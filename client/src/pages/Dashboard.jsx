@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { Trophy, Medal, ArrowRight, Sparkles, AlertCircle, Cpu } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5050/api';
 
 export default function Dashboard() {
   const [sections, setSections] = useState([]);
   const [models, setModels] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,6 +21,8 @@ export default function Dashboard() {
         setModels(modelsRes.data);
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -28,90 +32,138 @@ export default function Dashboard() {
     models.some(m => m.datasetSectionId?._id === section._id)
   );
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 space-y-4">
+        <div className="h-10 w-10 border-4 border-primary-container border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-on-surface-variant font-medium text-sm animate-pulse">Loading bioinformatics benchmark statistics...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-6xl mx-auto space-y-12">
-      <div className="text-center space-y-4">
-        <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-emerald-600 dark:from-blue-400 dark:to-emerald-400">
+    <div className="w-full space-y-12">
+      {/* Hero Header Section */}
+      <div className="text-center py-8 px-4 max-w-4xl mx-auto space-y-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-container/10 border border-primary-container/20 rounded-full text-xs font-bold text-primary font-outfit uppercase tracking-wider">
+          <Sparkles className="h-3.5 w-3.5 text-primary-container animate-pulse" />
+          Ablation Benchmarking Suite
+        </div>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-on-surface font-outfit tracking-tight leading-tight">
           Spatial Multi-Omics Leaderboard
         </h1>
-        <p className="text-xl text-slate-650 dark:text-slate-400 max-w-3xl mx-auto">
-          A centralized platform to track, compare, and display the performance of spatial bioinformatics models.
+        <p className="text-base md:text-lg text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+          A centralized, clinical-grade benchmark platform designed to track, compare, and display the performance of spatial bioinformatics and multi-omics integration models.
         </p>
       </div>
 
       {nonEmptySections.length === 0 ? (
-        <div className="text-center py-16 bg-white dark:bg-slate-800/25 border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm dark:shadow-inner max-w-2xl mx-auto">
-          <p className="text-lg font-semibold text-slate-700 dark:text-slate-300">No models submitted yet</p>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-md mx-auto">
-            All dataset categories are currently empty. Click on the button below to submit the first performance entry!
+        <div className="text-center py-16 bg-surface-container-lowest border border-dashed border-outline-variant rounded-lg max-w-2xl mx-auto p-8 shadow-sm">
+          <AlertCircle className="h-12 w-12 text-outline mx-auto mb-4 animate-bounce" />
+          <p className="text-lg font-bold text-on-surface">No Benchmark Models Submitted Yet</p>
+          <p className="text-sm text-on-surface-variant mt-2 max-w-md mx-auto leading-relaxed">
+            All dataset categories are currently empty. Login or register to submit the first performance entry for scientific validation.
           </p>
           <div className="mt-6">
             <Link 
               to="/submit" 
-              className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg text-sm transition-all font-semibold inline-block shadow-lg shadow-blue-900/30"
+              className="bg-primary-container hover:bg-primary-container/90 text-white px-6 py-2.5 rounded-default text-sm transition-all font-bold inline-flex items-center gap-2 shadow-sm"
             >
-              Submit First Model
+              Submit First Entry
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
       ) : (
-        nonEmptySections.map(section => {
-          const sectionModels = models.filter(m => m.datasetSectionId?._id === section._id);
-          // Sort by ARI descending
-          sectionModels.sort((a, b) => b.scoreARI - a.scoreARI);
+        <div className="space-y-12">
+          {nonEmptySections.map(section => {
+            const sectionModels = models.filter(m => m.datasetSectionId?._id === section._id);
+            // Sort by ARI descending
+            sectionModels.sort((a, b) => b.scoreARI - a.scoreARI);
 
-          return (
-            <div key={section._id} className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-md dark:shadow-xl backdrop-blur-sm transition-colors duration-300">
-              <h2 className="text-2xl font-bold text-slate-850 dark:text-white mb-6 flex items-center gap-2">
-                <span className="w-2 h-8 bg-blue-500 rounded-full inline-block"></span>
-                Dataset: {section.name}
-              </h2>
-              
-              <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
-                <table className="w-full text-left text-sm text-slate-650 dark:text-slate-300">
-                  <thead className="bg-slate-100 dark:bg-slate-800 text-xs uppercase text-slate-500 dark:text-slate-400">
-                    <tr>
-                      <th className="px-6 py-4 rounded-tl-lg">Rank</th>
-                      <th className="px-6 py-4">Model Name</th>
-                      <th className="px-6 py-4">Author</th>
-                      <th className="px-6 py-4 font-bold text-blue-600 dark:text-blue-400">ARI Score</th>
-                      <th className="px-6 py-4 font-bold text-emerald-600 dark:text-emerald-400">NMI Score</th>
-                      <th className="px-6 py-4 text-right rounded-tr-lg">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-700/50">
-                    {sectionModels.map((model, index) => (
-                      <tr key={model._id} className="hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition-colors">
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold ${
-                            index === 0 ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border border-yellow-500/30' :
-                            index === 1 ? 'bg-slate-450/10 text-slate-600 dark:text-slate-300 border border-slate-400/30' :
-                            index === 2 ? 'bg-amber-700/10 text-amber-700 dark:text-amber-600 border border-amber-700/30' :
-                            'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-500'
-                          }`}>
-                            {index + 1}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">{model.name}</td>
-                        <td className="px-6 py-4">{model.authorId?.name || 'Unknown'}</td>
-                        <td className="px-6 py-4 font-mono text-blue-600 dark:text-blue-400">{model.scoreARI.toFixed(3)}</td>
-                        <td className="px-6 py-4 font-mono text-emerald-600 dark:text-emerald-400">{model.scoreNMI.toFixed(3)}</td>
-                        <td className="px-6 py-4 text-right">
-                          <Link 
-                            to={`/models/${model._id}`}
-                            className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 font-medium hover:underline"
-                          >
-                            View Details →
-                          </Link>
-                        </td>
+            return (
+              <div 
+                key={section._id} 
+                className="bg-surface-container-lowest border border-outline-border rounded-lg p-6 md:p-8 shadow-sm transition-colors duration-300 relative overflow-hidden"
+              >
+                {/* Visual anchor bar */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-primary-container"></div>
+                
+                <h2 className="text-xl md:text-2xl font-bold text-on-surface mb-6 flex items-center gap-2.5 font-outfit">
+                  <span className="w-1.5 h-7 bg-primary-container rounded-full inline-block"></span>
+                  Dataset: {section.name}
+                </h2>
+                
+                <div className="overflow-x-auto rounded-default border border-outline-border bg-surface-container-lowest">
+                  <table className="w-full text-left text-sm text-on-surface-variant border-collapse">
+                    <thead className="bg-surface-container-low border-b border-outline-border text-xs uppercase font-semibold text-on-surface-variant tracking-wider font-outfit">
+                      <tr>
+                        <th className="px-6 py-4 w-28">Rank</th>
+                        <th className="px-6 py-4">Model Name</th>
+                        <th className="px-6 py-4">Author</th>
+                        <th className="px-6 py-4 font-bold text-primary">ARI Score</th>
+                        <th className="px-6 py-4 font-bold text-secondary">NMI Score</th>
+                        <th className="px-6 py-4 text-right">Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-outline-border">
+                      {sectionModels.map((model, index) => (
+                        <tr 
+                          key={model._id} 
+                          className="hover:bg-primary-container/[0.04] transition-all group relative"
+                        >
+                          <td className="px-6 py-4 font-semibold relative">
+                            {/* Hover Selection bar */}
+                            <span className="absolute left-0 top-0 bottom-0 w-[4px] bg-primary-container opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                            
+                            {index === 0 ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-tertiary-container/10 text-tertiary border border-tertiary-container/30">
+                                <Trophy className="h-3 w-3 text-tertiary animate-pulse" />
+                                1st
+                              </span>
+                            ) : index === 1 ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-secondary-container text-on-secondary-container border border-secondary-container/40">
+                                <Medal className="h-3 w-3" />
+                                2nd
+                              </span>
+                            ) : index === 2 ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-surface-container-high text-on-surface-variant border border-outline">
+                                <Medal className="h-3 w-3 text-amber-700" />
+                                3rd
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold bg-surface-container-low text-on-surface-variant border border-outline-border">
+                                {index + 1}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 font-bold text-on-surface">
+                            <div className="flex items-center gap-2">
+                              <Cpu className="h-4 w-4 text-primary-container/85" />
+                              {model.name}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium">{model.authorId?.name || 'Unknown'}</td>
+                          <td className="px-6 py-4 font-mono text-primary font-bold text-base">{model.scoreARI.toFixed(3)}</td>
+                          <td className="px-6 py-4 font-mono text-secondary font-bold text-base">{model.scoreNMI.toFixed(3)}</td>
+                          <td className="px-6 py-4 text-right">
+                            <Link 
+                              to={`/models/${model._id}`}
+                              className="inline-flex items-center gap-1 text-primary-container hover:text-primary font-bold text-sm transition-colors group/btn"
+                            >
+                              Details
+                              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-1" />
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          );
-        })
+            );
+          })}
+        </div>
       )}
     </div>
   );

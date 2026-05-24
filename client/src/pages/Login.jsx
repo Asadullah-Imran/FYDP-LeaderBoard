@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Lock, Mail, User, ArrowRight, UserPlus, Key } from 'lucide-react';
 
 const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5050/api'}/auth`;
 
@@ -30,52 +31,95 @@ export default function Login() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 bg-white dark:bg-slate-800 p-8 rounded-xl shadow-md dark:shadow-lg border border-slate-200 dark:border-slate-700 transition-colors duration-300">
-      <h2 className="text-3xl font-bold mb-6 text-center text-slate-850 dark:text-white">
-        {isLogin ? 'Login to SpatialAblate' : 'Create an Account'}
-      </h2>
+    <div className="max-w-md mx-auto mt-16 bg-surface-container-lowest p-8 rounded-lg border border-outline-border shadow-sm transition-all duration-300 relative overflow-hidden">
+      {/* Visual anchor bar */}
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary to-primary-container"></div>
+
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-extrabold text-on-surface font-outfit tracking-tight">
+          {isLogin ? 'Login to SpatialAblate' : 'Create an Account'}
+        </h2>
+        <p className="text-xs text-on-surface-variant mt-1.5">
+          {isLogin ? 'Enter your credentials to access the submission portal' : 'Register to publish spatial omics benchmarking results'}
+        </p>
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         {!isLogin && (
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Name</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit flex items-center gap-1.5">
+              <User className="h-3.5 w-3.5 text-primary-container" />
+              Full Name
+            </label>
             <input 
-              type="text" name="name" onChange={handleChange} required={!isLogin}
-              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+              type="text" 
+              name="name" 
+              placeholder="e.g. Dr. Jane Doe"
+              onChange={handleChange} 
+              required={!isLogin}
+              className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm"
             />
           </div>
         )}
         
         <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+          <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit flex items-center gap-1.5">
+            <Mail className="h-3.5 w-3.5 text-primary-container" />
+            Email Address
+          </label>
           <input 
-            type="email" name="email" onChange={handleChange} required
-            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+            type="email" 
+            name="email" 
+            placeholder="researcher@institute.edu"
+            onChange={handleChange} 
+            required
+            className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm"
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
+          <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit flex items-center gap-1.5">
+            <Lock className="h-3.5 w-3.5 text-primary-container" />
+            Password
+          </label>
           <input 
-            type="password" name="password" onChange={handleChange} required
-            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
+            type="password" 
+            name="password" 
+            placeholder="••••••••"
+            onChange={handleChange} 
+            required
+            className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm"
           />
         </div>
         
-        <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded mt-4 transition-colors cursor-pointer">
-          {isLogin ? 'Login' : 'Register'}
+        <button 
+          type="submit" 
+          className="w-full bg-primary-container hover:bg-primary-container/90 text-white font-bold py-2.5 px-4 rounded-default mt-6 transition-colors cursor-pointer flex items-center justify-center gap-1.5 text-sm"
+        >
+          {isLogin ? (
+            <>
+              Sign In
+              <ArrowRight className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              Create Account
+              <UserPlus className="h-4 w-4" />
+            </>
+          )}
         </button>
       </form>
       
-      <p className="mt-6 text-center text-slate-550 dark:text-slate-400">
-        {isLogin ? "Don't have an account? " : "Already have an account? "}
+      <div className="mt-8 pt-6 border-t border-outline-border text-center text-sm text-on-surface-variant">
+        {isLogin ? "Don't have a benchmarking account? " : "Already registered? "}
         <button 
+          type="button"
           onClick={() => setIsLogin(!isLogin)} 
-          className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+          className="text-primary-container hover:text-primary font-bold hover:underline cursor-pointer transition-colors"
         >
-          {isLogin ? 'Register' : 'Login'}
+          {isLogin ? 'Register Here' : 'Login Here'}
         </button>
-      </p>
+      </div>
     </div>
   );
 }
