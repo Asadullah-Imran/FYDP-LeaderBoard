@@ -5,6 +5,9 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
+// Disable buffering commands in Mongoose for fast failure in serverless environments (Vercel)
+mongoose.set('bufferCommands', false);
+
 const authRoutes = require("./routes/authRoutes");
 const sectionRoutes = require("./routes/sectionRoutes");
 const modelRoutes = require("./routes/modelRoutes");
@@ -33,6 +36,9 @@ const connectDB = async () => {
   try {
     const conn = await mongoose.connect(
       process.env.MONGO_URI || "mongodb://localhost:27017/leaderboard",
+      {
+        serverSelectionTimeoutMS: 5000, // Timeout connection attempt after 5 seconds instead of hanging
+      }
     );
     console.log(`MongoDB Connected: ${conn.connection.host}`);
 
