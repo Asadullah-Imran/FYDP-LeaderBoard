@@ -84,4 +84,10 @@ This log tracks functional changes and additions made to the server codebase:
   * Validates request payloads and updates fields securely (Model Name, Dataset Section, ARI/NMI Scores, Methodology description, and Architecture flow).
   * Enforces ownership validation: only the original model author or an admin is authorized to perform changes.
 
+#### 🌐 Vercel Serverless Ready & CORS Configuration
+* **[MODIFY]** Modularized backend configuration by separating Express app instantiation to `server/app.js` and server listening to `server/index.js` for seamless Vercel Serverless deployments.
+* **[NEW]** Configured Vercel rewrites inside `vercel.json` and created serverless entry handler `api/index.js`.
+* **[MODIFY]** Enhanced CORS settings in `server/app.js` to process strict multi-origin arrays from environment variables (`FRONTEND_URL` in `server/.env`). Authorized both `http://localhost:5173` and `https://fydp-leader-board.vercel.app` dynamically.
+
+
 
