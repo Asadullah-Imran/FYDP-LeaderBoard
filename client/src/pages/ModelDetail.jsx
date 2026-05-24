@@ -7,7 +7,7 @@ import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import mermaid from 'mermaid';
 import { useAuth } from '../context/AuthContext';
-import { Edit2, Trash2, Check, X, Eye, Edit3, ChevronsUpDown, Search, Image, ArrowLeft, Cpu, Layers, BookOpen, AlertTriangle } from 'lucide-react';
+import { Edit2, Trash2, Check, X, Eye, Edit3, ChevronsUpDown, Search, Image, ArrowLeft, Cpu, Layers, BookOpen, AlertTriangle, Code, ExternalLink } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5050/api';
 
@@ -32,7 +32,8 @@ export default function ModelDetail() {
     descriptionMarkdown: '',
     architectureFlow: '',
     datasetSectionId: '',
-    methodologyImages: []
+    methodologyImages: [],
+    githubUrl: ''
   });
 
   // Searchable dropdown inside edit mode
@@ -127,7 +128,8 @@ export default function ModelDetail() {
       descriptionMarkdown: model.descriptionMarkdown,
       architectureFlow: model.architectureFlow || '',
       datasetSectionId: model.datasetSectionId?._id || model.datasetSectionId,
-      methodologyImages: model.methodologyImages || []
+      methodologyImages: model.methodologyImages || [],
+      githubUrl: model.githubUrl || ''
     });
     setImageFile(null);
     setIsEditing(true);
@@ -267,9 +269,26 @@ export default function ModelDetail() {
                   <Cpu className="h-8 w-8 text-primary-container" />
                   {model.name}
                 </h1>
-                <p className="text-sm text-on-surface-variant">
-                  Submitted by <span className="text-on-surface font-bold">{model.authorId?.name || 'Unknown'}</span> for dataset 
-                  <span className="text-primary font-bold ml-1">{model.datasetSectionId?.name || 'Deleted Section'}</span>
+                <p className="text-sm text-on-surface-variant flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span>
+                    Submitted by <span className="text-on-surface font-bold">{model.authorId?.name || 'Unknown'}</span> for dataset 
+                    <span className="text-primary font-bold ml-1">{model.datasetSectionId?.name || 'Deleted Section'}</span>
+                  </span>
+                  {model.githubUrl && (
+                    <>
+                      <span className="text-outline-border text-xs">•</span>
+                      <a 
+                        href={model.githubUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="inline-flex items-center gap-1 text-primary hover:text-primary-container font-bold text-xs"
+                      >
+                        <Code className="h-3.5 w-3.5" />
+                        Source Code
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </>
+                  )}
                 </p>
               </div>
               <div className="flex gap-4 self-stretch md:self-auto">
@@ -563,6 +582,21 @@ export default function ModelDetail() {
                   ✓ Selected: "{imageFile.name}" (will upload on save)
                 </p>
               )}
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit flex items-center gap-1.5">
+                <Code className="h-4 w-4 text-primary-container" />
+                GitHub Repository (Source Code) - Optional
+              </label>
+              <input 
+                type="url" 
+                name="githubUrl" 
+                value={editData.githubUrl} 
+                onChange={handleEditChange} 
+                placeholder="e.g. https://github.com/username/project-repo"
+                className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-semibold"
+              />
             </div>
 
             <div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Check, ChevronsUpDown, Search, Eye, Edit3, UploadCloud, Info, BookOpen, ArrowLeft } from 'lucide-react';
+import { Check, ChevronsUpDown, Search, Eye, Edit3, UploadCloud, Info, BookOpen, ArrowLeft, Code } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -17,6 +17,7 @@ export default function SubmitModel() {
     scoreNMI: '',
     descriptionMarkdown: '',
     architectureFlow: '',
+    githubUrl: '',
   });
   const [imageFile, setImageFile] = useState(null);
   const [sections, setSections] = useState([]);
@@ -315,6 +316,21 @@ export default function SubmitModel() {
               onChange={handleImageChange} 
               accept="image/*"
               className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface text-sm file:mr-4 file:py-1.5 file:px-3.5 file:rounded-default file:border-0 file:text-xs file:font-bold file:bg-primary-container file:text-white hover:file:bg-primary-container/90 transition-colors cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit flex items-center gap-1.5">
+              <Code className="h-4 w-4 text-primary-container" />
+              GitHub Repository (Source Code) - Optional
+            </label>
+            <input 
+              type="url" 
+              name="githubUrl" 
+              placeholder="e.g. https://github.com/username/project-repo"
+              value={formData.githubUrl} 
+              onChange={handleChange} 
+              className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-semibold"
             />
           </div>
 

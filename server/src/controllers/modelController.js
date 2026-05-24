@@ -26,7 +26,7 @@ const getModelById = async (req, res) => {
 };
 
 const createModel = async (req, res) => {
-  const { name, datasetSectionId, scoreARI, scoreNMI, descriptionMarkdown, methodologyImages, architectureFlow } = req.body;
+  const { name, datasetSectionId, scoreARI, scoreNMI, descriptionMarkdown, methodologyImages, architectureFlow, githubUrl } = req.body;
 
   try {
     const model = new ModelSubmission({
@@ -37,7 +37,8 @@ const createModel = async (req, res) => {
       scoreNMI,
       descriptionMarkdown,
       methodologyImages,
-      architectureFlow
+      architectureFlow,
+      githubUrl
     });
 
     const createdModel = await model.save();
@@ -68,7 +69,7 @@ const deleteModel = async (req, res) => {
 };
 
 const updateModel = async (req, res) => {
-  const { name, datasetSectionId, scoreARI, scoreNMI, descriptionMarkdown, methodologyImages, architectureFlow } = req.body;
+  const { name, datasetSectionId, scoreARI, scoreNMI, descriptionMarkdown, methodologyImages, architectureFlow, githubUrl } = req.body;
 
   try {
     const model = await ModelSubmission.findById(req.params.id);
@@ -86,6 +87,7 @@ const updateModel = async (req, res) => {
       model.descriptionMarkdown = descriptionMarkdown !== undefined ? descriptionMarkdown : model.descriptionMarkdown;
       model.methodologyImages = methodologyImages || model.methodologyImages;
       model.architectureFlow = architectureFlow !== undefined ? architectureFlow : model.architectureFlow;
+      model.githubUrl = githubUrl !== undefined ? githubUrl : model.githubUrl;
 
       const updatedModel = await model.save();
       

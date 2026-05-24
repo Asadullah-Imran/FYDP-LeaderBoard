@@ -23,6 +23,7 @@ const modelSubmissionSchema = new mongoose.Schema({
   descriptionMarkdown: { type: String, required: true }, // Markdown + LaTeX content
   methodologyImages: [{ type: String }], // Array of image URLs for methodology
   architectureFlow: { type: String }, // Optional Mermaid.js syntax content
+  githubUrl: { type: String }, // Optional link to source code / github repository
   
 }, { timestamps: true });
 
