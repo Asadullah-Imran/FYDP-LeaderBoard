@@ -5,6 +5,7 @@ const { v2: cloudinary } = require('cloudinary');
 const { protect } = require('../middleware/authMiddleware');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 // Cloudinary Configuration
 cloudinary.config({
@@ -16,9 +17,11 @@ cloudinary.config({
 // Multer Storage Configuration (Local temporary storage)
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    const uploadPath = path.join(__dirname, '../uploads/');
+    const uploadPath = process.env.VERCEL 
+      ? os.tmpdir() 
+      : path.join(__dirname, '../uploads/');
     if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath);
+      fs.mkdirSync(uploadPath, { recursive: true });
     }
     cb(null, uploadPath);
   },
