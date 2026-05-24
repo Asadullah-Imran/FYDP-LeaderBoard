@@ -21,6 +21,7 @@ export default function SubmitModel() {
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [sections, setSections] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   // Searchable dropdown states
@@ -76,6 +77,8 @@ export default function SubmitModel() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     const token = localStorage.getItem('token');
     
     try {
@@ -116,6 +119,8 @@ export default function SubmitModel() {
     } catch (error) {
       console.error('Error submitting model:', error);
       alert('Failed to submit model. Are you logged in?');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -384,10 +389,20 @@ export default function SubmitModel() {
 
           <button 
             type="submit" 
-            className="w-full bg-primary-container hover:bg-primary-container/90 text-white font-extrabold py-3 px-4 rounded-default transition-all cursor-pointer shadow-sm text-sm flex items-center justify-center gap-2 mt-8"
+            disabled={isSubmitting}
+            className="w-full bg-primary-container hover:bg-primary-container/90 text-white font-extrabold py-3 px-4 rounded-default transition-all cursor-pointer shadow-sm text-sm flex items-center justify-center gap-2 mt-8 disabled:opacity-75 disabled:cursor-not-allowed"
           >
-            Submit Model Statistics
-            <Check className="h-4.5 w-4.5" />
+            {isSubmitting ? (
+              <>
+                Submitting Model Blueprint...
+                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              </>
+            ) : (
+              <>
+                Submit Model Statistics
+                <Check className="h-4.5 w-4.5" />
+              </>
+            )}
           </button>
         </form>
       </div>
