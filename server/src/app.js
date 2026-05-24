@@ -15,7 +15,7 @@ const app = express();
 const allowedOrigins = (
   process.env.FRONTEND_URL ||
   process.env.CLIENT_URL ||
-  ""
+  "https://fydp-leader-board.vercel.app"
 )
   .split(",")
   .map((origin) => origin.trim())
@@ -59,8 +59,11 @@ const connectDB = async () => {
       }
     }
   } catch (error) {
-    console.error(`Error: ${error.message}`);
-    process.exit(1);
+    console.error(`Database connection or seeding failed: ${error.message}`);
+    // DO NOT crash the process on serverless environments (Vercel) to let CORS middleware send proper responses.
+    if (!process.env.VERCEL) {
+      process.exit(1);
+    }
   }
 };
 
