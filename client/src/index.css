@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Configure class-based dark mode for Tailwind v4 */
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary: #3b82f6;
   --color-secondary: #10b981;
@@ -8,6 +11,13 @@
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background-color: var(--color-dark);
-  color: white;
+  background-color: #f8fafc; /* light bg: bg-slate-50 */
+  color: #0f172a; /* light text: text-slate-900 */
+  transition-property: color, background-color, border-color;
+  transition-duration: 300ms;
+}
+
+html.dark body {
+  background-color: #0f172a; /* dark bg: bg-slate-900 / --color-dark */
+  color: #f1f5f9; /* dark text: text-slate-100 */
 }

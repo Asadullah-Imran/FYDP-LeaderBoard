@@ -31,18 +31,18 @@ export default function Dashboard() {
   return (
     <div className="max-w-6xl mx-auto space-y-12">
       <div className="text-center space-y-4">
-        <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+        <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-emerald-600 dark:from-blue-400 dark:to-emerald-400">
           Spatial Multi-Omics Leaderboard
         </h1>
-        <p className="text-xl text-slate-400 max-w-3xl mx-auto">
+        <p className="text-xl text-slate-650 dark:text-slate-400 max-w-3xl mx-auto">
           A centralized platform to track, compare, and display the performance of spatial bioinformatics models.
         </p>
       </div>
 
       {nonEmptySections.length === 0 ? (
-        <div className="text-center py-16 bg-slate-800/25 border border-dashed border-slate-700 rounded-2xl shadow-inner max-w-2xl mx-auto">
-          <p className="text-lg font-semibold text-slate-300">No models submitted yet</p>
-          <p className="text-sm text-slate-500 mt-1.5 max-w-md mx-auto">
+        <div className="text-center py-16 bg-white dark:bg-slate-800/25 border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm dark:shadow-inner max-w-2xl mx-auto">
+          <p className="text-lg font-semibold text-slate-700 dark:text-slate-300">No models submitted yet</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-md mx-auto">
             All dataset categories are currently empty. Click on the button below to submit the first performance entry!
           </p>
           <div className="mt-6">
@@ -61,45 +61,45 @@ export default function Dashboard() {
           sectionModels.sort((a, b) => b.scoreARI - a.scoreARI);
 
           return (
-            <div key={section._id} className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <div key={section._id} className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-md dark:shadow-xl backdrop-blur-sm transition-colors duration-300">
+              <h2 className="text-2xl font-bold text-slate-850 dark:text-white mb-6 flex items-center gap-2">
                 <span className="w-2 h-8 bg-blue-500 rounded-full inline-block"></span>
                 Dataset: {section.name}
               </h2>
               
-              <div className="overflow-x-auto rounded-lg border border-slate-700 bg-slate-900/50">
-                <table className="w-full text-left text-sm text-slate-300">
-                  <thead className="bg-slate-800 text-xs uppercase text-slate-400">
+              <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                <table className="w-full text-left text-sm text-slate-650 dark:text-slate-300">
+                  <thead className="bg-slate-100 dark:bg-slate-800 text-xs uppercase text-slate-500 dark:text-slate-400">
                     <tr>
                       <th className="px-6 py-4 rounded-tl-lg">Rank</th>
                       <th className="px-6 py-4">Model Name</th>
                       <th className="px-6 py-4">Author</th>
-                      <th className="px-6 py-4 font-bold text-blue-400">ARI Score</th>
-                      <th className="px-6 py-4 font-bold text-emerald-400">NMI Score</th>
+                      <th className="px-6 py-4 font-bold text-blue-600 dark:text-blue-400">ARI Score</th>
+                      <th className="px-6 py-4 font-bold text-emerald-600 dark:text-emerald-400">NMI Score</th>
                       <th className="px-6 py-4 text-right rounded-tr-lg">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-700/50">
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-700/50">
                     {sectionModels.map((model, index) => (
-                      <tr key={model._id} className="hover:bg-slate-800/80 transition-colors">
+                      <tr key={model._id} className="hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition-colors">
                         <td className="px-6 py-4">
                           <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold ${
-                            index === 0 ? 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/50' :
-                            index === 1 ? 'bg-slate-400/20 text-slate-300 border border-slate-400/50' :
-                            index === 2 ? 'bg-amber-700/20 text-amber-600 border border-amber-700/50' :
-                            'bg-slate-800 text-slate-500'
+                            index === 0 ? 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border border-yellow-500/30' :
+                            index === 1 ? 'bg-slate-450/10 text-slate-600 dark:text-slate-300 border border-slate-400/30' :
+                            index === 2 ? 'bg-amber-700/10 text-amber-700 dark:text-amber-600 border border-amber-700/30' :
+                            'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-500'
                           }`}>
                             {index + 1}
                           </span>
                         </td>
-                        <td className="px-6 py-4 font-medium text-white">{model.name}</td>
+                        <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">{model.name}</td>
                         <td className="px-6 py-4">{model.authorId?.name || 'Unknown'}</td>
-                        <td className="px-6 py-4 font-mono text-blue-400">{model.scoreARI.toFixed(3)}</td>
-                        <td className="px-6 py-4 font-mono text-emerald-400">{model.scoreNMI.toFixed(3)}</td>
+                        <td className="px-6 py-4 font-mono text-blue-600 dark:text-blue-400">{model.scoreARI.toFixed(3)}</td>
+                        <td className="px-6 py-4 font-mono text-emerald-600 dark:text-emerald-400">{model.scoreNMI.toFixed(3)}</td>
                         <td className="px-6 py-4 text-right">
                           <Link 
                             to={`/models/${model._id}`}
-                            className="text-blue-400 hover:text-blue-300 font-medium hover:underline"
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 font-medium hover:underline"
                           >
                             View Details →
                           </Link>

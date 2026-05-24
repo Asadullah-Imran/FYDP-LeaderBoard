@@ -216,7 +216,7 @@ export default function ModelDetail() {
         )}
       </div>
 
-      <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl relative overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-2xl relative overflow-hidden transition-colors duration-300">
         {/* Decorative background element */}
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
         
@@ -226,27 +226,27 @@ export default function ModelDetail() {
             <>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
                 <div>
-                  <h1 className="text-4xl font-extrabold text-white mb-2">{model.name}</h1>
-                  <p className="text-slate-400">
-                    Submitted by <span className="text-slate-300 font-medium">{model.authorId?.name || 'Unknown'}</span> for dataset 
-                    <span className="text-blue-400 font-medium ml-1">{model.datasetSectionId?.name || 'Deleted Section'}</span>
+                  <h1 className="text-4xl font-extrabold text-slate-850 dark:text-white mb-2">{model.name}</h1>
+                  <p className="text-slate-650 dark:text-slate-400">
+                    Submitted by <span className="text-slate-800 dark:text-slate-300 font-medium">{model.authorId?.name || 'Unknown'}</span> for dataset 
+                    <span className="text-blue-600 dark:text-blue-400 font-medium ml-1">{model.datasetSectionId?.name || 'Deleted Section'}</span>
                   </p>
                 </div>
                 <div className="flex gap-4 self-stretch md:self-auto">
-                  <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 text-center min-w-[100px] flex-1 md:flex-none">
-                    <div className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">ARI</div>
-                    <div className="text-2xl font-mono text-blue-400 font-bold">{model.scoreARI?.toFixed(3)}</div>
+                  <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-4 text-center min-w-[100px] flex-1 md:flex-none">
+                    <div className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">ARI</div>
+                    <div className="text-2xl font-mono text-blue-600 dark:text-blue-400 font-bold">{model.scoreARI?.toFixed(3)}</div>
                   </div>
-                  <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 text-center min-w-[100px] flex-1 md:flex-none">
-                    <div className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">NMI</div>
-                    <div className="text-2xl font-mono text-emerald-400 font-bold">{model.scoreNMI?.toFixed(3)}</div>
+                  <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-4 text-center min-w-[100px] flex-1 md:flex-none">
+                    <div className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">NMI</div>
+                    <div className="text-2xl font-mono text-emerald-600 dark:text-emerald-400 font-bold">{model.scoreNMI?.toFixed(3)}</div>
                   </div>
                 </div>
               </div>
 
-              <div className="prose prose-invert prose-blue max-w-none mt-10">
-                <h2 className="text-2xl font-bold border-b border-slate-700 pb-2 mb-6">Methodology</h2>
-                <div className="text-slate-300 leading-relaxed">
+              <div className="prose dark:prose-invert prose-blue max-w-none mt-10">
+                <h2 className="text-2xl font-bold border-b border-slate-200 dark:border-slate-700 pb-2 mb-6 text-slate-850 dark:text-white">Methodology</h2>
+                <div className="text-slate-700 dark:text-slate-300 leading-relaxed">
                   <ReactMarkdown 
                     remarkPlugins={[remarkMath]}
                     rehypePlugins={[rehypeKatex]}
@@ -258,8 +258,8 @@ export default function ModelDetail() {
 
               {model.architectureFlow && (
                 <div className="mt-12">
-                  <h2 className="text-2xl font-bold border-b border-slate-700 pb-2 mb-6">Architecture Flow</h2>
-                  <div className="bg-slate-900 p-6 rounded-lg border border-slate-700 overflow-x-auto flex justify-center">
+                  <h2 className="text-2xl font-bold border-b border-slate-200 dark:border-slate-700 pb-2 mb-6 text-slate-850 dark:text-white">Architecture Flow</h2>
+                  <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-lg border border-slate-200 dark:border-slate-700 overflow-x-auto flex justify-center">
                     <div className="mermaid">
                       {model.architectureFlow}
                     </div>
@@ -269,14 +269,14 @@ export default function ModelDetail() {
 
               {model.methodologyImages && model.methodologyImages.length > 0 && (
                 <div className="mt-12">
-                  <h2 className="text-2xl font-bold border-b border-slate-700 pb-2 mb-6">Gallery</h2>
+                  <h2 className="text-2xl font-bold border-b border-slate-200 dark:border-slate-700 pb-2 mb-6 text-slate-850 dark:text-white">Gallery</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {model.methodologyImages.map((img, idx) => (
                       <img 
                         key={idx} 
                         src={img} 
                         alt={`Methodology ${idx + 1}`} 
-                        className="rounded-lg shadow-md border border-slate-700 w-full object-cover max-h-80 hover:scale-[1.02] transition-transform cursor-pointer"
+                        className="rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 w-full object-cover max-h-80 hover:scale-[1.02] transition-transform cursor-pointer"
                       />
                     ))}
                   </div>
@@ -286,13 +286,13 @@ export default function ModelDetail() {
           ) : (
             /* DYNAMIC EDIT FORM VIEW */
             <form onSubmit={handleSave} className="space-y-6">
-              <div className="flex justify-between items-center border-b border-slate-700 pb-4 mb-6">
-                <h2 className="text-2xl font-bold text-white">Edit Model Submission</h2>
+              <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-4 mb-6">
+                <h2 className="text-2xl font-bold text-slate-850 dark:text-white">Edit Model Submission</h2>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={cancelEditing}
-                    className="flex items-center gap-1 bg-slate-700 hover:bg-slate-600 text-slate-200 px-3.5 py-1.5 rounded-lg text-sm transition-colors cursor-pointer font-semibold"
+                    className="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-250 px-3.5 py-1.5 rounded-lg text-sm transition-colors cursor-pointer font-semibold border border-slate-200 dark:border-slate-600"
                   >
                     <X className="h-4 w-4" />
                     Cancel
@@ -310,40 +310,40 @@ export default function ModelDetail() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Model Name</label>
+                  <label className="block text-sm font-medium text-slate-755 dark:text-slate-300 mb-2">Model Name</label>
                   <input 
                     type="text" name="name" value={editData.name} onChange={handleEditChange} required
-                    className="w-full bg-slate-900 border border-slate-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
                   />
                 </div>
                 
                 <div className="relative" ref={dropdownRef}>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Dataset Section</label>
+                  <label className="block text-sm font-medium text-slate-755 dark:text-slate-300 mb-2">Dataset Section</label>
                   <button
                     type="button"
                     onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="w-full flex items-center justify-between bg-slate-900 border border-slate-600 rounded px-4 py-2 text-white hover:border-blue-500 focus:outline-none focus:border-blue-500 transition-colors text-left"
+                    className="w-full flex items-center justify-between bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white hover:border-blue-500 focus:outline-none focus:border-blue-500 transition-colors text-left"
                   >
                     <span className="truncate">
                       {selectedSection ? selectedSection.name : 'Select a dataset section...'}
                     </span>
-                    <ChevronsUpDown className="h-4 w-4 text-slate-400 shrink-0 ml-2" />
+                    <ChevronsUpDown className="h-4 w-4 text-slate-450 dark:text-slate-400 shrink-0 ml-2" />
                   </button>
 
                   {dropdownOpen && (
-                    <div className="absolute z-50 mt-1 w-full bg-slate-900 border border-slate-750 rounded-lg shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
-                      <div className="p-2 border-b border-slate-800 flex items-center gap-2 bg-slate-950/50">
+                    <div className="absolute z-50 mt-1 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-lg shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+                      <div className="p-2 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2 bg-slate-50 dark:bg-slate-955/50">
                         <Search className="h-4 w-4 text-slate-500 shrink-0" />
                         <input
                           type="text"
                           placeholder="Search dataset sections..."
                           value={dropdownSearch}
                           onChange={(e) => setDropdownSearch(e.target.value)}
-                          className="w-full bg-transparent text-sm text-white focus:outline-none placeholder-slate-500"
+                          className="w-full bg-transparent text-sm text-slate-900 dark:text-white focus:outline-none placeholder-slate-500"
                           autoFocus
                         />
                       </div>
-                      <ul className="max-h-60 overflow-y-auto py-1 divide-y divide-slate-800/30">
+                      <ul className="max-h-60 overflow-y-auto py-1 divide-y divide-slate-100 dark:divide-slate-800/30">
                         {filteredSections.length > 0 ? (
                           filteredSections.map((section) => {
                             const isSelected = section._id === editData.datasetSectionId;
@@ -358,12 +358,12 @@ export default function ModelDetail() {
                                   }}
                                   className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left transition-colors cursor-pointer ${
                                     isSelected
-                                      ? 'bg-blue-600/20 text-blue-400 font-semibold'
-                                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                                      ? 'bg-blue-50 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400 font-semibold'
+                                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white'
                                   }`}
                                 >
                                   <span className="truncate">{section.name}</span>
-                                  {isSelected && <Check className="h-4 w-4 text-blue-400 shrink-0 ml-2" />}
+                                  {isSelected && <Check className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0 ml-2" />}
                                 </button>
                               </li>
                             );
@@ -379,33 +379,33 @@ export default function ModelDetail() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">ARI Score</label>
+                  <label className="block text-sm font-medium text-slate-755 dark:text-slate-300 mb-2">ARI Score</label>
                   <input 
                     type="number" step="0.001" name="scoreARI" value={editData.scoreARI} onChange={handleEditChange} required
-                    className="w-full bg-slate-900 border border-slate-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">NMI Score</label>
+                  <label className="block text-sm font-medium text-slate-755 dark:text-slate-300 mb-2">NMI Score</label>
                   <input 
                     type="number" step="0.001" name="scoreNMI" value={editData.scoreNMI} onChange={handleEditChange} required
-                    className="w-full bg-slate-900 border border-slate-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
                   />
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <label className="block text-sm font-medium text-slate-300">Description (Markdown + LaTeX)</label>
-                  <div className="flex bg-slate-900 p-0.5 rounded-lg border border-slate-700">
+                  <label className="block text-sm font-medium text-slate-755 dark:text-slate-300">Description (Markdown + LaTeX)</label>
+                  <div className="flex bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
                     <button
                       type="button"
                       onClick={() => setEditTab('write')}
                       className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold cursor-pointer transition-all ${
                         editTab === 'write'
                           ? 'bg-blue-600 text-white shadow-sm'
-                          : 'text-slate-400 hover:text-slate-200'
+                          : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
                       }`}
                     >
                       <Edit className="h-3 w-3" />
@@ -417,7 +417,7 @@ export default function ModelDetail() {
                       className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold cursor-pointer transition-all ${
                         editTab === 'preview'
                           ? 'bg-blue-600 text-white shadow-sm'
-                          : 'text-slate-400 hover:text-slate-200'
+                          : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
                       }`}
                     >
                       <Eye className="h-3 w-3" />
@@ -429,13 +429,13 @@ export default function ModelDetail() {
                 {editTab === 'write' ? (
                   <textarea 
                     name="descriptionMarkdown" value={editData.descriptionMarkdown} onChange={handleEditChange} required rows={8}
-                    className="w-full bg-slate-900 border border-slate-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition-colors font-mono text-sm"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors font-mono text-sm"
                     placeholder="Write description using Markdown and LaTeX..."
                   ></textarea>
                 ) : (
-                  <div className="w-full bg-slate-900 border border-slate-600 rounded-lg p-6 min-h-[178px] prose prose-invert max-w-none overflow-y-auto">
+                  <div className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded-lg p-6 min-h-[178px] prose dark:prose-invert text-slate-750 dark:text-slate-300 max-w-none overflow-y-auto">
                     {editData.descriptionMarkdown.trim() ? (
-                      <div className="text-slate-300 leading-relaxed text-sm">
+                      <div className="text-slate-700 dark:text-slate-300 leading-relaxed text-sm">
                         <ReactMarkdown 
                           remarkPlugins={[remarkMath]}
                           rehypePlugins={[rehypeKatex]}
@@ -453,13 +453,13 @@ export default function ModelDetail() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Methodology Images (Gallery)</label>
+                <label className="block text-sm font-medium text-slate-755 dark:text-slate-300 mb-2">Methodology Images (Gallery)</label>
                 
                 {/* Previews of currently uploaded images */}
                 {editData.methodologyImages.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     {editData.methodologyImages.map((img, idx) => (
-                      <div key={idx} className="relative group border border-slate-700 rounded-lg overflow-hidden h-24 bg-slate-900 shadow-md">
+                      <div key={idx} className="relative group border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden h-24 bg-slate-50 dark:bg-slate-900 shadow-md">
                         <img src={img} alt={`Methodology ${idx + 1}`} className="w-full h-full object-cover" />
                         <button
                           type="button"
@@ -484,7 +484,7 @@ export default function ModelDetail() {
                   type="file" 
                   onChange={handleImageChange} 
                   accept="image/*"
-                  className="w-full bg-slate-900 border border-slate-600 rounded px-4 py-2 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition-colors cursor-pointer"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition-colors cursor-pointer"
                 />
                 {imageFile && (
                   <p className="text-xs text-blue-400 mt-2 font-medium flex items-center gap-1.5">
@@ -495,10 +495,10 @@ export default function ModelDetail() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Architecture Flow (Mermaid.js) - Optional</label>
+                <label className="block text-sm font-medium text-slate-755 dark:text-slate-300 mb-2">Architecture Flow (Mermaid.js) - Optional</label>
                 <textarea 
                   name="architectureFlow" value={editData.architectureFlow} onChange={handleEditChange} rows={4}
-                  className="w-full bg-slate-900 border border-slate-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition-colors font-mono text-sm"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-350 dark:border-slate-650 rounded px-4 py-2 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors font-mono text-sm"
                   placeholder="graph TD;&#10;  A-->B;"
                 ></textarea>
               </div>
