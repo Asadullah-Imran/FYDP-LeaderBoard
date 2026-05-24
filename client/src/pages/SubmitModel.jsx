@@ -124,7 +124,7 @@ export default function SubmitModel() {
         Back to Dashboard
       </button>
 
-      <div className="bg-surface-container-lowest p-8 rounded-lg border border-outline-border shadow-sm transition-all duration-300 relative overflow-hidden">
+      <div className="bg-surface-container-lowest p-5 sm:p-8 rounded-lg border border-outline-border shadow-sm transition-all duration-300 relative overflow-hidden">
         {/* Visual anchor bar */}
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary to-primary-container"></div>
         
@@ -244,7 +244,7 @@ export default function SubmitModel() {
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
               <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant font-outfit flex items-center gap-1.5">
                 <BookOpen className="h-4 w-4 text-primary-container" />
                 Methodology Explanation (Markdown + LaTeX)

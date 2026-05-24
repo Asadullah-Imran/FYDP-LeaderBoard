@@ -249,7 +249,7 @@ export default function ModelDetail() {
         )}
       </div>
 
-      <div className="bg-surface-container-lowest rounded-lg p-6 md:p-8 border border-outline-border shadow-sm relative overflow-hidden transition-all duration-300">
+      <div className="bg-surface-container-lowest rounded-lg p-5 sm:p-8 border border-outline-border shadow-sm relative overflow-hidden transition-all duration-300">
         {/* Visual anchor bar */}
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary to-primary-container"></div>
         
@@ -462,7 +462,7 @@ export default function ModelDetail() {
             </div>
 
             <div>
-              <div className="flex justify-between items-center mb-2">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
                 <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant font-outfit flex items-center gap-1.5">
                   <BookOpen className="h-4 w-4 text-primary-container" />
                   Description (Markdown + LaTeX)

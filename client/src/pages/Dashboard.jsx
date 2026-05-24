@@ -98,12 +98,12 @@ export default function Dashboard() {
                   <table className="w-full text-left text-sm text-on-surface-variant border-collapse">
                     <thead className="bg-surface-container-low border-b border-outline-border text-xs uppercase font-semibold text-on-surface-variant tracking-wider font-outfit">
                       <tr>
-                        <th className="px-6 py-4 w-28">Rank</th>
-                        <th className="px-6 py-4">Model Name</th>
-                        <th className="px-6 py-4">Author</th>
-                        <th className="px-6 py-4 font-bold text-primary">ARI Score</th>
-                        <th className="px-6 py-4 font-bold text-secondary">NMI Score</th>
-                        <th className="px-6 py-4 text-right">Action</th>
+                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 w-20 sm:w-28">Rank</th>
+                        <th className="px-3 sm:px-6 py-3.5 sm:py-4">Model Name</th>
+                        <th className="px-3 sm:px-6 py-3.5 sm:py-4">Author</th>
+                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-bold text-primary">ARI</th>
+                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-bold text-secondary">NMI</th>
+                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-outline-border">
@@ -112,47 +112,47 @@ export default function Dashboard() {
                           key={model._id} 
                           className="hover:bg-primary-container/[0.04] transition-all group relative"
                         >
-                          <td className="px-6 py-4 font-semibold relative">
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-semibold relative">
                             {/* Hover Selection bar */}
                             <span className="absolute left-0 top-0 bottom-0 w-[4px] bg-primary-container opacity-0 group-hover:opacity-100 transition-opacity"></span>
                             
                             {index === 0 ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-tertiary-container/10 text-tertiary border border-tertiary-container/30">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-tertiary-container/10 text-tertiary border border-tertiary-container/30">
                                 <Trophy className="h-3 w-3 text-tertiary animate-pulse" />
                                 1st
                               </span>
                             ) : index === 1 ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-secondary-container text-on-secondary-container border border-secondary-container/40">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-secondary-container text-on-secondary-container border border-secondary-container/40">
                                 <Medal className="h-3 w-3" />
                                 2nd
                               </span>
                             ) : index === 2 ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-surface-container-high text-on-surface-variant border border-outline">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-surface-container-high text-on-surface-variant border border-outline">
                                 <Medal className="h-3 w-3 text-amber-700" />
                                 3rd
                               </span>
                             ) : (
-                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold bg-surface-container-low text-on-surface-variant border border-outline-border">
+                              <span className="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full text-[10px] sm:text-xs font-bold bg-surface-container-low text-on-surface-variant border border-outline-border">
                                 {index + 1}
                               </span>
                             )}
                           </td>
-                          <td className="px-6 py-4 font-bold text-on-surface">
-                            <div className="flex items-center gap-2">
-                              <Cpu className="h-4 w-4 text-primary-container/85" />
-                              {model.name}
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-bold text-on-surface">
+                            <div className="flex items-center gap-1.5 text-xs sm:text-sm">
+                              <Cpu className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-container/85 shrink-0" />
+                              <span className="truncate max-w-[120px] sm:max-w-none">{model.name}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 font-medium">{model.authorId?.name || 'Unknown'}</td>
-                          <td className="px-6 py-4 font-mono text-primary font-bold text-base">{model.scoreARI.toFixed(3)}</td>
-                          <td className="px-6 py-4 font-mono text-secondary font-bold text-base">{model.scoreNMI.toFixed(3)}</td>
-                          <td className="px-6 py-4 text-right">
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium">{model.authorId?.name || 'Unknown'}</td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-primary font-bold text-xs sm:text-sm md:text-base">{model.scoreARI.toFixed(3)}</td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-secondary font-bold text-xs sm:text-sm md:text-base">{model.scoreNMI.toFixed(3)}</td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
                             <Link 
                               to={`/models/${model._id}`}
-                              className="inline-flex items-center gap-1 text-primary-container hover:text-primary font-bold text-sm transition-colors group/btn"
+                              className="inline-flex items-center gap-0.5 sm:gap-1 text-primary-container hover:text-primary font-bold text-xs sm:text-sm transition-colors group/btn"
                             >
                               Details
-                              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-1" />
+                              <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 transition-transform group-hover/btn:translate-x-1" />
                             </Link>
                           </td>
                         </tr>

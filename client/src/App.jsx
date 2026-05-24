@@ -15,56 +15,62 @@ function Navigation() {
   return (
     <header className="bg-surface-container-lowest border-b border-outline-border py-4 px-4 md:px-8 flex justify-between items-center transition-colors shadow-sm sticky top-0 z-50">
       <div className="max-w-[1440px] w-full mx-auto flex justify-between items-center">
-        <Link to="/" className="text-2xl font-extrabold text-primary font-outfit tracking-tight hover:opacity-90 flex items-center gap-1.5">
+        <Link to="/" className="text-lg sm:text-2xl font-extrabold text-primary font-outfit tracking-tight hover:opacity-90 flex items-center gap-1.5 shrink-0">
           <span>SpatialAblate</span>
-          <span className="h-2 w-2 rounded-full bg-primary-container animate-pulse"></span>
+          <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-primary-container animate-pulse"></span>
         </Link>
-        <nav className="flex gap-4 md:gap-6 items-center font-medium">
-          <Link 
-            to="/" 
-            className="hover:text-primary-container text-on-surface-variant transition-colors text-sm font-semibold flex items-center gap-1.5"
-          >
-            <Database className="h-4 w-4" />
-            <span className="hidden sm:inline">Dashboard</span>
-          </Link>
-          <Link 
-            to="/submit" 
-            className="hover:text-primary-container text-on-surface-variant transition-colors text-sm font-semibold flex items-center gap-1.5"
-          >
-            <PlusCircle className="h-4 w-4" />
-            <span className="hidden sm:inline">Submit Model</span>
-          </Link>
-          
-          {/* Subtle separator */}
-          <div className="h-4 w-px bg-outline-border hidden sm:block"></div>
+        <nav className="flex gap-2.5 sm:gap-4 md:gap-6 items-center font-medium">
+          {user && (
+            <>
+              <Link 
+                to="/" 
+                className="hover:text-primary-container text-on-surface-variant transition-colors text-sm font-semibold flex items-center gap-1.5"
+              >
+                <Database className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">Dashboard</span>
+              </Link>
+              <Link 
+                to="/submit" 
+                className="hover:text-primary-container text-on-surface-variant transition-colors text-sm font-semibold flex items-center gap-1.5"
+              >
+                <PlusCircle className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">Submit Model</span>
+              </Link>
+              
+              {/* Subtle separator */}
+              <div className="h-4 w-px bg-outline-border hidden sm:block"></div>
+            </>
+          )}
 
-          {/* Theme Toggle Button (Retained for functionality but fully aligned) */}
+          {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-default bg-surface-container-low hover:bg-surface-container hover:text-primary transition-all border border-outline-border cursor-pointer flex items-center justify-center text-on-surface-variant"
+            className="p-2 rounded-default bg-surface-container-low hover:bg-surface-container hover:text-primary transition-all border border-outline-border cursor-pointer flex items-center justify-center text-on-surface-variant shrink-0"
             aria-label="Toggle dark mode"
           >
-            {isDark ? <Sun className="h-4.5 w-4.5 text-tertiary-container fill-tertiary-container" /> : <Moon className="h-4.5 w-4.5 text-on-surface" />}
+            {isDark ? <Sun className="h-4 w-4 text-tertiary-container fill-tertiary-container" /> : <Moon className="h-4 w-4 text-on-surface" />}
           </button>
 
           {user ? (
-            <div className="flex items-center gap-2 md:gap-3">
-              <span className="text-on-surface font-semibold bg-surface-container-low px-3.5 py-1.5 rounded-default border border-outline-border text-xs md:text-sm flex items-center gap-1.5">
-                <User className="h-3.5 w-3.5 text-primary" />
-                {user.name}
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+              <span className="text-on-surface font-semibold bg-surface-container-low px-2 sm:px-3.5 py-1.5 rounded-default border border-outline-border text-xs sm:text-sm flex items-center gap-1.5">
+                <User className="h-3.5 w-3.5 text-primary shrink-0" />
+                <span className="truncate max-w-[50px] sm:max-w-[120px] md:max-w-none inline-block">
+                  {user.name}
+                </span>
               </span>
               <button 
                 onClick={logout}
-                className="bg-surface-container-lowest hover:bg-error-container hover:text-error hover:border-error-container text-on-surface-variant px-3.5 py-1.5 rounded-default text-xs md:text-sm transition-all border border-outline-border cursor-pointer flex items-center gap-1.5 font-semibold"
+                className="bg-surface-container-lowest hover:bg-error-container hover:text-error hover:border-error-container text-on-surface-variant px-2.5 sm:px-3.5 py-1.5 rounded-default text-xs sm:text-sm transition-all border border-outline-border cursor-pointer flex items-center gap-1.5 font-semibold shrink-0"
               >
-                <LogOut className="h-3.5 w-3.5" />
+                <LogOut className="h-3.5 w-3.5 shrink-0" />
                 <span className="hidden md:inline">Logout</span>
               </button>
             </div>
           ) : (
             <Link 
               to="/login" 
-              className="bg-primary-container hover:bg-primary-container/90 text-white px-4.5 py-1.5 rounded-default text-sm transition-all cursor-pointer font-bold flex items-center gap-1.5"
+              className="bg-primary-container hover:bg-primary-container/90 text-white px-3 sm:px-4.5 py-1.5 rounded-default text-xs sm:text-sm transition-all cursor-pointer font-bold flex items-center gap-1.5 shrink-0"
             >
               Login
             </Link>
@@ -73,6 +79,12 @@ function Navigation() {
       </div>
     </header>
   );
+}
+
+// Protected Route Guard Wrapper
+function ProtectedRoute({ children }) {
+  const { user } = useAuth();
+  return user ? children : <Login />;
 }
 
 function App() {
@@ -85,9 +97,9 @@ function App() {
 
             <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 md:px-8 py-8 overflow-auto">
               <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/submit" element={<SubmitModel />} />
-                <Route path="/models/:id" element={<ModelDetail />} />
+                <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/submit" element={<ProtectedRoute><SubmitModel /></ProtectedRoute>} />
+                <Route path="/models/:id" element={<ProtectedRoute><ModelDetail /></ProtectedRoute>} />
                 <Route path="/login" element={<Login />} />
               </Routes>
             </main>

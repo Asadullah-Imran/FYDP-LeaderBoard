@@ -31,7 +31,7 @@ export default function Login() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-16 bg-surface-container-lowest p-8 rounded-lg border border-outline-border shadow-sm transition-all duration-300 relative overflow-hidden">
+    <div className="max-w-md mx-auto mt-8 sm:mt-16 bg-surface-container-lowest p-5 sm:p-8 rounded-lg border border-outline-border shadow-sm transition-all duration-300 relative overflow-hidden">
       {/* Visual anchor bar */}
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary to-primary-container"></div>
 
