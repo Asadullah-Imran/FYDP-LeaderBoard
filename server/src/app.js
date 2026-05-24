@@ -73,7 +73,72 @@ const connectDB = async () => {
   }
 };
 
+// Middleware to ensure database is connected before executing any queries (prevents Serverless cold start race conditions)
+const ensureDbConnected = async (req, res, next) => {
+  // 1 = connected
+  if (mongoose.connection.readyState === 1) {
+    return next();
+  }
+
+  // 2 = connecting, wait for it
+  if (mongoose.connection.readyState === 2) {
+    console.log("Database connection in progress, waiting for connected state...");
+    try {
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error("Timeout waiting for database connection to establish"));
+        }, 5000);
+
+        const onConnected = () => {
+          clearTimeout(timeout);
+          cleanup();
+          resolve();
+        };
+
+        const onError = (err) => {
+          clearTimeout(timeout);
+          cleanup();
+          reject(err);
+        };
+
+        const cleanup = () => {
+          mongoose.connection.off('connected', onConnected);
+          mongoose.connection.off('error', onError);
+        };
+
+        mongoose.connection.once('connected', onConnected);
+        mongoose.connection.once('error', onError);
+      });
+      return next();
+    } catch (error) {
+      return res.status(500).json({ 
+        message: "Database connection in progress but failed", 
+        error: error.message 
+      });
+    }
+  }
+
+  // 0 = disconnected, 3 = disconnecting. Try to connect.
+  console.log("Database disconnected. Initiating database connection...");
+  try {
+    await mongoose.connect(
+      process.env.MONGO_URI || "mongodb://localhost:27017/leaderboard",
+      {
+        serverSelectionTimeoutMS: 5000,
+      }
+    );
+    return next();
+  } catch (error) {
+    return res.status(500).json({ 
+      message: "Database connection failed", 
+      error: error.message 
+    });
+  }
+};
+
 connectDB();
+
+app.use(ensureDbConnected);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/sections", sectionRoutes);
