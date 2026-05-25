@@ -65,4 +65,54 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+const getUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).select('-password');
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+const updateUser = async (req, res) => {
+  const { name, email, role } = req.body;
+  try {
+    const user = await User.findById(req.params.id);
+    if (user) {
+      user.name = name || user.name;
+      user.email = email || user.email;
+      user.role = role || user.role;
+
+      const updatedUser = await user.save();
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (user) {
+      if (user._id.toString() === req.user._id.toString()) {
+        return res.status(400).json({ message: 'Admin cannot delete themselves' });
+      }
+      await User.deleteOne({ _id: user._id });
+      res.json({ message: 'User removed' });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, getUsers, updateUser, deleteUser };

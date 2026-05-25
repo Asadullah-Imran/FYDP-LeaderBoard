@@ -1,12 +1,13 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import ModelDetail from './pages/ModelDetail';
 import SubmitModel from './pages/SubmitModel';
 import Login from './pages/Login';
+import AdminPanel from './pages/AdminPanel';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
-import { Sun, Moon, Database, PlusCircle, User, LogOut } from 'lucide-react';
+import { Sun, Moon, Database, PlusCircle, User, LogOut, Shield } from 'lucide-react';
 
 function Navigation() {
   const { user, logout } = useAuth();
@@ -36,6 +37,16 @@ function Navigation() {
                 <PlusCircle className="h-4 w-4 shrink-0" />
                 <span className="hidden sm:inline">Submit Model</span>
               </Link>
+
+              {user.role === 'admin' && (
+                <Link 
+                  to="/admin" 
+                  className="hover:text-primary-container text-on-surface-variant transition-colors text-sm font-semibold flex items-center gap-1.5"
+                >
+                  <Shield className="h-4 w-4 shrink-0 text-primary animate-pulse" />
+                  <span className="hidden sm:inline">Admin Panel</span>
+                </Link>
+              )}
               
               {/* Subtle separator */}
               <div className="h-4 w-px bg-outline-border hidden sm:block"></div>
@@ -87,6 +98,13 @@ function ProtectedRoute({ children }) {
   return user ? children : <Login />;
 }
 
+// Admin Route Guard Wrapper
+function AdminRoute({ children }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  return user.role === 'admin' ? children : <Navigate to="/" replace />;
+}
+
 function App() {
   return (
     <ThemeProvider>
@@ -100,6 +118,7 @@ function App() {
                 <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                 <Route path="/submit" element={<ProtectedRoute><SubmitModel /></ProtectedRoute>} />
                 <Route path="/models/:id" element={<ProtectedRoute><ModelDetail /></ProtectedRoute>} />
+                <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
                 <Route path="/login" element={<Login />} />
               </Routes>
             </main>

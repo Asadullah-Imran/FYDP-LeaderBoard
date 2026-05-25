@@ -64,6 +64,27 @@ const connectDB = async () => {
         console.log(`Seeded dataset section: ${name}`);
       }
     }
+
+    // Auto-seed default Admin user if none exists
+    const User = require("./models/User");
+    const bcrypt = require("bcrypt");
+    const adminExists = await User.findOne({ role: "admin" });
+    if (!adminExists) {
+      const adminEmail = process.env.ADMIN_EMAIL || "admin@gmail.com";
+      const adminPassword = process.env.ADMIN_PASSWORD || "admin";
+      const adminName = "System Admin";
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(adminPassword, salt);
+
+      await User.create({
+        name: adminName,
+        email: adminEmail,
+        password: hashedPassword,
+        role: "admin",
+      });
+      console.log(`Seeded admin account: ${adminEmail}`);
+    }
   } catch (error) {
     console.error(`Database connection or seeding failed: ${error.message}`);
     // DO NOT crash the process on serverless environments (Vercel) to let CORS middleware send proper responses.
