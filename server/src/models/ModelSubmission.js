@@ -23,6 +23,8 @@ const modelSubmissionSchema = new mongoose.Schema({
   scoreHomogeneity: { type: Number },
   scoreVMeasure: { type: Number },
   
+  clusterSize: { type: Number, required: true },
+  
   // Parsed Artifacts & Uploads
   descriptionMarkdown: { type: String, required: true }, // Markdown + LaTeX content
   methodologyImages: [{ type: String }], // Array of image URLs for methodology

@@ -35,6 +35,7 @@ const createModel = async (req, res) => {
     scoreAMI,
     scoreHomogeneity,
     scoreVMeasure,
+    clusterSize,
     descriptionMarkdown, 
     methodologyImages, 
     architectureFlow, 
@@ -52,6 +53,7 @@ const createModel = async (req, res) => {
       scoreAMI: scoreAMI !== undefined && scoreAMI !== '' ? parseFloat(scoreAMI) : undefined,
       scoreHomogeneity: scoreHomogeneity !== undefined && scoreHomogeneity !== '' ? parseFloat(scoreHomogeneity) : undefined,
       scoreVMeasure: scoreVMeasure !== undefined && scoreVMeasure !== '' ? parseFloat(scoreVMeasure) : undefined,
+      clusterSize: clusterSize !== undefined && clusterSize !== '' ? parseInt(clusterSize) : undefined,
       descriptionMarkdown,
       methodologyImages,
       architectureFlow,
@@ -99,6 +101,7 @@ const updateModel = async (req, res) => {
     scoreAMI,
     scoreHomogeneity,
     scoreVMeasure,
+    clusterSize,
     descriptionMarkdown, 
     methodologyImages, 
     architectureFlow, 
@@ -122,6 +125,7 @@ const updateModel = async (req, res) => {
       model.scoreAMI = scoreAMI !== undefined ? (scoreAMI !== '' ? parseFloat(scoreAMI) : undefined) : model.scoreAMI;
       model.scoreHomogeneity = scoreHomogeneity !== undefined ? (scoreHomogeneity !== '' ? parseFloat(scoreHomogeneity) : undefined) : model.scoreHomogeneity;
       model.scoreVMeasure = scoreVMeasure !== undefined ? (scoreVMeasure !== '' ? parseFloat(scoreVMeasure) : undefined) : model.scoreVMeasure;
+      model.clusterSize = clusterSize !== undefined ? (clusterSize !== '' ? parseInt(clusterSize) : undefined) : model.clusterSize;
       model.descriptionMarkdown = descriptionMarkdown !== undefined ? descriptionMarkdown : model.descriptionMarkdown;
       model.methodologyImages = methodologyImages || model.methodologyImages;
       model.architectureFlow = architectureFlow !== undefined ? architectureFlow : model.architectureFlow;

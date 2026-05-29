@@ -39,7 +39,8 @@ export default function ModelDetail() {
     architectureFlow: '',
     datasetSectionId: '',
     methodologyImages: [],
-    githubUrl: ''
+    githubUrl: '',
+    clusterSize: ''
   });
 
   // Searchable dropdown inside edit mode
@@ -139,7 +140,8 @@ export default function ModelDetail() {
       architectureFlow: model.architectureFlow || '',
       datasetSectionId: model.datasetSectionId?._id || model.datasetSectionId,
       methodologyImages: model.methodologyImages || [],
-      githubUrl: model.githubUrl || ''
+      githubUrl: model.githubUrl || '',
+      clusterSize: model.clusterSize !== undefined && model.clusterSize !== null ? model.clusterSize : ''
     });
     setImageFiles([]);
     setIsEditing(true);
@@ -207,6 +209,12 @@ export default function ModelDetail() {
         return;
       }
 
+      if (!editData.clusterSize || isNaN(parseInt(editData.clusterSize)) || parseInt(editData.clusterSize) <= 0) {
+        await showAlert('Validation Error', 'You must provide a valid positive integer for Cluster Size.', 'warning');
+        setIsSaving(false);
+        return;
+      }
+
       const payload = {
         ...editData,
         scoreARI: scoreARIVal,
@@ -215,6 +223,7 @@ export default function ModelDetail() {
         scoreAMI: editData.scoreAMI !== '' ? parseFloat(editData.scoreAMI) : undefined,
         scoreHomogeneity: editData.scoreHomogeneity !== '' ? parseFloat(editData.scoreHomogeneity) : undefined,
         scoreVMeasure: editData.scoreVMeasure !== '' ? parseFloat(editData.scoreVMeasure) : undefined,
+        clusterSize: parseInt(editData.clusterSize),
         methodologyImages: finalImages
       };
 
@@ -318,7 +327,8 @@ export default function ModelDetail() {
                 <p className="text-sm text-on-surface-variant flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span>
                     Submitted by <span className="text-on-surface font-bold">{model.authorId?.name || 'Unknown'}</span> for dataset 
-                    <span className="text-primary font-bold ml-1">{model.datasetSectionId?.name || 'Deleted Section'}</span>
+                    <span className="text-primary font-bold ml-1">{model.datasetSectionId?.name || 'Deleted Section'}</span> with 
+                    <span className="text-secondary font-bold ml-1">{model.clusterSize} clusters</span>
                   </span>
                   {model.githubUrl && (
                     <>
@@ -459,7 +469,7 @@ export default function ModelDetail() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Model Name</label>
                 <input 
@@ -531,6 +541,19 @@ export default function ModelDetail() {
                     </ul>
                   </div>
                 )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Number of Clusters</label>
+                <input 
+                  type="number" 
+                  name="clusterSize" 
+                  value={editData.clusterSize} 
+                  onChange={handleEditChange} 
+                  required
+                  min="1"
+                  className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-semibold font-mono"
+                />
               </div>
             </div>
 

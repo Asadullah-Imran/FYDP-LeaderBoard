@@ -21,6 +21,7 @@ export default function SubmitModel() {
     scoreAMI: '',
     scoreHomogeneity: '',
     scoreVMeasure: '',
+    clusterSize: '',
     descriptionMarkdown: '',
     architectureFlow: '',
     githubUrl: '',
@@ -123,6 +124,12 @@ export default function SubmitModel() {
         return;
       }
 
+      if (!formData.clusterSize || isNaN(parseInt(formData.clusterSize)) || parseInt(formData.clusterSize) <= 0) {
+        await showAlert('Validation Error', 'You must provide a valid positive integer for Cluster Size.', 'warning');
+        setIsSubmitting(false);
+        return;
+      }
+
       // Submit model
       const modelPayload = {
         ...formData,
@@ -132,6 +139,7 @@ export default function SubmitModel() {
         scoreAMI: formData.scoreAMI !== '' ? parseFloat(formData.scoreAMI) : undefined,
         scoreHomogeneity: formData.scoreHomogeneity !== '' ? parseFloat(formData.scoreHomogeneity) : undefined,
         scoreVMeasure: formData.scoreVMeasure !== '' ? parseFloat(formData.scoreVMeasure) : undefined,
+        clusterSize: parseInt(formData.clusterSize),
         methodologyImages: imageUrls
       };
 
@@ -182,7 +190,7 @@ export default function SubmitModel() {
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Model Name</label>
               <input 
@@ -255,6 +263,20 @@ export default function SubmitModel() {
                   </ul>
                 </div>
               )}
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Number of Clusters</label>
+              <input 
+                type="number" 
+                name="clusterSize" 
+                placeholder="e.g. 15"
+                value={formData.clusterSize} 
+                onChange={handleChange} 
+                required
+                min="1"
+                className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-semibold font-mono"
+              />
             </div>
           </div>
 
