@@ -313,7 +313,7 @@ export default function ModelDetail() {
         {!isEditing ? (
           /* STATIC DISPLAY VIEW */
           <div className="space-y-10">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-outline-border pb-6">
+            <div className="flex flex-col gap-6 border-b border-outline-border pb-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary-container/10 text-primary border border-primary-container/20 font-outfit">
@@ -347,48 +347,48 @@ export default function ModelDetail() {
                   )}
                 </p>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 w-full self-stretch md:self-auto md:w-auto">
-                <div className="bg-surface-container-low border border-outline-border rounded-default p-3 text-center min-w-[100px] shadow-sm">
-                  <div className="text-[9px] text-primary uppercase font-extrabold tracking-wider mb-1 font-outfit">ARI Score</div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3.5 w-full">
+                <div className="bg-surface-container-low hover:translate-y-[-2px] hover:shadow-md border border-outline-border/60 rounded-default p-3.5 text-center transition-all duration-300 shadow-sm cursor-default">
+                  <div className="text-[9px] text-primary uppercase font-extrabold tracking-wider mb-1.5 font-outfit">ARI Score</div>
                   <div className="text-xl sm:text-2xl font-mono text-primary font-extrabold">
                     {model.scoreARI !== undefined && model.scoreARI !== null ? model.scoreARI.toFixed(3) : '-'}
                   </div>
-                  <span className="text-[8px] text-on-surface-variant block">Gold standard</span>
+                  <span className="text-[8px] text-on-surface-variant/80 block mt-1 font-medium">Gold standard</span>
                 </div>
-                <div className="bg-surface-container-low border border-outline-border rounded-default p-3 text-center min-w-[100px] shadow-sm">
-                  <div className="text-[9px] text-secondary uppercase font-extrabold tracking-wider mb-1 font-outfit">NMI Score</div>
+                <div className="bg-surface-container-low hover:translate-y-[-2px] hover:shadow-md border border-outline-border/60 rounded-default p-3.5 text-center transition-all duration-300 shadow-sm cursor-default">
+                  <div className="text-[9px] text-secondary uppercase font-extrabold tracking-wider mb-1.5 font-outfit">NMI Score</div>
                   <div className="text-xl sm:text-2xl font-mono text-secondary font-extrabold">
                     {model.scoreNMI !== undefined && model.scoreNMI !== null ? model.scoreNMI.toFixed(3) : '-'}
                   </div>
-                  <span className="text-[8px] text-on-surface-variant block">Cluster agreement</span>
+                  <span className="text-[8px] text-on-surface-variant/80 block mt-1 font-medium">Cluster agreement</span>
                 </div>
-                <div className="bg-surface-container-low border border-outline-border rounded-default p-3 text-center min-w-[100px] shadow-sm">
-                  <div className="text-[9px] text-tertiary uppercase font-extrabold tracking-wider mb-1 font-outfit">Silhouette</div>
+                <div className="bg-surface-container-low hover:translate-y-[-2px] hover:shadow-md border border-outline-border/60 rounded-default p-3.5 text-center transition-all duration-300 shadow-sm cursor-default">
+                  <div className="text-[9px] text-tertiary uppercase font-extrabold tracking-wider mb-1.5 font-outfit">Silhouette</div>
                   <div className="text-xl sm:text-2xl font-mono text-tertiary font-extrabold">
                     {model.scoreSilhouette !== undefined && model.scoreSilhouette !== null ? model.scoreSilhouette.toFixed(3) : '-'}
                   </div>
-                  <span className="text-[8px] text-on-surface-variant block">Cluster compact</span>
+                  <span className="text-[8px] text-on-surface-variant/80 block mt-1 font-medium">Cluster compact</span>
                 </div>
-                <div className={`bg-surface-container-low border border-outline-border rounded-default p-3 text-center min-w-[100px] shadow-sm ${model.scoreAMI === undefined || model.scoreAMI === null ? 'opacity-40' : ''}`}>
-                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 uppercase font-extrabold tracking-wider mb-1 font-outfit">AMI Score</div>
+                <div className={`bg-surface-container-low hover:translate-y-[-2px] hover:shadow-md border border-outline-border/60 rounded-default p-3.5 text-center transition-all duration-300 shadow-sm cursor-default ${model.scoreAMI === undefined || model.scoreAMI === null ? 'opacity-40' : ''}`}>
+                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 uppercase font-extrabold tracking-wider mb-1.5 font-outfit">AMI Score</div>
                   <div className="text-xl sm:text-2xl font-mono text-emerald-600 dark:text-emerald-400 font-extrabold">
                     {model.scoreAMI !== undefined && model.scoreAMI !== null ? model.scoreAMI.toFixed(3) : '-'}
                   </div>
-                  <span className="text-[8px] text-on-surface-variant block">Robust mutual info</span>
+                  <span className="text-[8px] text-on-surface-variant/80 block mt-1 font-medium">Robust mutual info</span>
                 </div>
-                <div className={`bg-surface-container-low border border-outline-border rounded-default p-3 text-center min-w-[100px] shadow-sm ${model.scoreHomogeneity === undefined || model.scoreHomogeneity === null ? 'opacity-40' : ''}`}>
-                  <div className="text-[9px] text-amber-600 dark:text-amber-500 uppercase font-extrabold tracking-wider mb-1 font-outfit">Homogeneity</div>
+                <div className={`bg-surface-container-low hover:translate-y-[-2px] hover:shadow-md border border-outline-border/60 rounded-default p-3.5 text-center transition-all duration-300 shadow-sm cursor-default ${model.scoreHomogeneity === undefined || model.scoreHomogeneity === null ? 'opacity-40' : ''}`}>
+                  <div className="text-[9px] text-amber-600 dark:text-amber-500 uppercase font-extrabold tracking-wider mb-1.5 font-outfit">Homogeneity</div>
                   <div className="text-xl sm:text-2xl font-mono text-amber-600 dark:text-amber-500 font-extrabold">
                     {model.scoreHomogeneity !== undefined && model.scoreHomogeneity !== null ? model.scoreHomogeneity.toFixed(3) : '-'}
                   </div>
-                  <span className="text-[8px] text-on-surface-variant block">Purity score</span>
+                  <span className="text-[8px] text-on-surface-variant/80 block mt-1 font-medium">Purity score</span>
                 </div>
-                <div className={`bg-surface-container-low border border-outline-border rounded-default p-3 text-center min-w-[100px] shadow-sm ${model.scoreVMeasure === undefined || model.scoreVMeasure === null ? 'opacity-40' : ''}`}>
-                  <div className="text-[9px] text-purple-600 dark:text-purple-400 uppercase font-extrabold tracking-wider mb-1 font-outfit">V-Measure</div>
+                <div className={`bg-surface-container-low hover:translate-y-[-2px] hover:shadow-md border border-outline-border/60 rounded-default p-3.5 text-center transition-all duration-300 shadow-sm cursor-default ${model.scoreVMeasure === undefined || model.scoreVMeasure === null ? 'opacity-40' : ''}`}>
+                  <div className="text-[9px] text-purple-600 dark:text-purple-400 uppercase font-extrabold tracking-wider mb-1.5 font-outfit">V-Measure</div>
                   <div className="text-xl sm:text-2xl font-mono text-purple-600 dark:text-purple-400 font-extrabold">
                     {model.scoreVMeasure !== undefined && model.scoreVMeasure !== null ? model.scoreVMeasure.toFixed(3) : '-'}
                   </div>
-                  <span className="text-[8px] text-on-surface-variant block">Completeness bal</span>
+                  <span className="text-[8px] text-on-surface-variant/80 block mt-1 font-medium">Completeness bal</span>
                 </div>
               </div>
             </div>
