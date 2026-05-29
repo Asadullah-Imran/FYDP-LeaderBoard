@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Lock, Mail, User, ArrowRight, UserPlus, Key } from 'lucide-react';
+import { usePopup } from '../context/PopupContext';
+import { Lock, Mail, User, ArrowRight, UserPlus } from 'lucide-react';
 
 const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5050/api'}/auth`;
 
 export default function Login() {
+  const { showAlert } = usePopup();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const navigate = useNavigate();
@@ -26,7 +28,8 @@ export default function Login() {
       navigate('/');
     } catch (error) {
       console.error('Auth Error:', error);
-      alert('Authentication failed');
+      const errMsg = error.response?.data?.message || 'Authentication failed. Please verify credentials.';
+      await showAlert('Authentication Error', errMsg, 'error');
     }
   };
 

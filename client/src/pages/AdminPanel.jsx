@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { 
@@ -18,15 +18,16 @@ import {
   CheckCircle,
   FileText,
   Clock,
-  Sparkles,
   RefreshCw
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { usePopup } from '../context/PopupContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5050/api';
 
 export default function AdminPanel() {
   const { user } = useAuth();
+  const { showConfirm } = usePopup();
   
   // Data lists
   const [users, setUsers] = useState([]);
@@ -46,6 +47,14 @@ export default function AdminPanel() {
   const [creatingSection, setCreatingSection] = useState(false);
   const [searchUser, setSearchUser] = useState('');
   const [searchModel, setSearchModel] = useState('');
+
+  // Show temporary action feedback banner
+  const showFeedback = (type, text) => {
+    setActionMessage({ type, text });
+    setTimeout(() => {
+      setActionMessage(null);
+    }, 4500);
+  };
 
   // Fetch all system data
   const fetchData = async (isSilent = false) => {
@@ -78,14 +87,6 @@ export default function AdminPanel() {
     fetchData();
   }, []);
 
-  // Show temporary action feedback banner
-  const showFeedback = (type, text) => {
-    setActionMessage({ type, text });
-    setTimeout(() => {
-      setActionMessage(null);
-    }, 4500);
-  };
-
   // Section Handlers
   const handleCreateSection = async (e) => {
     e.preventDefault();
@@ -116,7 +117,12 @@ export default function AdminPanel() {
       confirmMsg += `\n\nWARNING: There are ${connectedModels.length} models submitted to this dataset. Deleting the section will leave these entries orphaned or cause database lookup errors!`;
     }
 
-    if (!window.confirm(confirmMsg)) return;
+    const confirmed = await showConfirm(
+      'Delete Dataset Section',
+      confirmMsg,
+      'danger'
+    );
+    if (!confirmed) return;
 
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
@@ -144,7 +150,12 @@ export default function AdminPanel() {
     const nextRole = targetUser.role === 'admin' ? 'member' : 'admin';
     const confirmMsg = `Are you sure you want to change ${targetUser.name}'s role to ${nextRole.toUpperCase()}?`;
     
-    if (!window.confirm(confirmMsg)) return;
+    const confirmed = await showConfirm(
+      'Modify User Role',
+      confirmMsg,
+      'warning'
+    );
+    if (!confirmed) return;
 
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
@@ -171,7 +182,12 @@ export default function AdminPanel() {
       confirmMsg += `\n\nWARNING: This user has submitted ${connectedModelsCount} model(s) to the leaderboard. Deleting the user will leave their submissions without an author reference!`;
     }
 
-    if (!window.confirm(confirmMsg)) return;
+    const confirmed = await showConfirm(
+      'Delete Researcher Account',
+      confirmMsg,
+      'danger'
+    );
+    if (!confirmed) return;
 
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
@@ -190,7 +206,12 @@ export default function AdminPanel() {
 
   // Model Handlers (Admins can delete any model)
   const handleDeleteModel = async (modelId, modelName) => {
-    if (!window.confirm(`Are you absolutely sure you want to delete model submission "${modelName}"? This action is permanent.`)) {
+    const confirmed = await showConfirm(
+      'Delete Model Submission',
+      `Are you absolutely sure you want to delete model submission "${modelName}"? This action is permanent.`,
+      'danger'
+    );
+    if (!confirmed) {
       return;
     }
 

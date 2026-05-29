@@ -1,5 +1,4 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import ModelDetail from './pages/ModelDetail';
 import SubmitModel from './pages/SubmitModel';
@@ -7,6 +6,7 @@ import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { PopupProvider } from './context/PopupContext';
 import { Sun, Moon, Database, PlusCircle, User, LogOut, Shield } from 'lucide-react';
 
 function Navigation() {
@@ -109,21 +109,23 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-background text-on-background flex flex-col transition-colors duration-300 font-inter">
-            <Navigation />
+        <PopupProvider>
+          <Router>
+            <div className="min-h-screen bg-background text-on-background flex flex-col transition-colors duration-300 font-inter">
+              <Navigation />
 
-            <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 md:px-8 py-8 overflow-auto">
-              <Routes>
-                <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/submit" element={<ProtectedRoute><SubmitModel /></ProtectedRoute>} />
-                <Route path="/models/:id" element={<ProtectedRoute><ModelDetail /></ProtectedRoute>} />
-                <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
-                <Route path="/login" element={<Login />} />
-              </Routes>
-            </main>
-          </div>
-        </Router>
+              <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 md:px-8 py-8 overflow-auto">
+                <Routes>
+                  <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                  <Route path="/submit" element={<ProtectedRoute><SubmitModel /></ProtectedRoute>} />
+                  <Route path="/models/:id" element={<ProtectedRoute><ModelDetail /></ProtectedRoute>} />
+                  <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+                  <Route path="/login" element={<Login />} />
+                </Routes>
+              </main>
+            </div>
+          </Router>
+        </PopupProvider>
       </AuthProvider>
     </ThemeProvider>
   );

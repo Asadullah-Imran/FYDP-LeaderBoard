@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Check, ChevronsUpDown, Search, Eye, Edit3, UploadCloud, Info, BookOpen, ArrowLeft, Code, Trash2, Image } from 'lucide-react';
@@ -6,10 +6,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import { usePopup } from '../context/PopupContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5050/api';
 
 export default function SubmitModel() {
+  const { showAlert } = usePopup();
   const [formData, setFormData] = useState({
     name: '',
     datasetSectionId: '',
@@ -116,7 +118,7 @@ export default function SubmitModel() {
       if (scoreSilhouetteVal !== undefined && !isNaN(scoreSilhouetteVal)) count++;
 
       if (count < 2) {
-        alert('Validation Error: You must provide at least two of the primary metrics (ARI, NMI, Silhouette) to submit your model benchmarks.');
+        await showAlert('Validation Error', 'You must provide at least two of the primary metrics (ARI, NMI, Silhouette) to submit your model benchmarks.', 'warning');
         setIsSubmitting(false);
         return;
       }
@@ -143,7 +145,7 @@ export default function SubmitModel() {
     } catch (error) {
       console.error('Error submitting model:', error);
       const errMsg = error.response?.data?.message || 'Failed to submit model. Are you logged in?';
-      alert(errMsg);
+      await showAlert('Submission Failed', errMsg, 'error');
     } finally {
       setIsSubmitting(false);
     }

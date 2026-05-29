@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
@@ -7,6 +7,7 @@ import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import mermaid from 'mermaid';
 import { useAuth } from '../context/AuthContext';
+import { usePopup } from '../context/PopupContext';
 import { Edit2, Trash2, Check, X, Eye, Edit3, ChevronsUpDown, Search, Image, ArrowLeft, Cpu, Layers, BookOpen, AlertTriangle, Code, ExternalLink } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5050/api';
@@ -15,6 +16,7 @@ export default function ModelDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showAlert, showConfirm } = usePopup();
 
   const [model, setModel] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -200,7 +202,7 @@ export default function ModelDetail() {
       if (scoreSilhouetteVal !== undefined && !isNaN(scoreSilhouetteVal)) count++;
 
       if (count < 2) {
-        alert('Validation Error: You must provide at least two of the primary metrics (ARI, NMI, Silhouette) to save changes.');
+        await showAlert('Validation Error', 'You must provide at least two of the primary metrics (ARI, NMI, Silhouette) to save changes.', 'warning');
         setIsSaving(false);
         return;
       }
@@ -228,14 +230,19 @@ export default function ModelDetail() {
     } catch (error) {
       console.error('Error updating model:', error);
       const errMsg = error.response?.data?.message || 'Failed to update model. Please check authorization.';
-      alert(errMsg);
+      await showAlert('Update Failed', errMsg, 'error');
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you absolutely sure you want to delete this model submission? This action cannot be undone.')) {
+    const confirmed = await showConfirm(
+      'Confirm Deletion',
+      'Are you absolutely sure you want to delete this model submission? This action cannot be undone.',
+      'danger'
+    );
+    if (!confirmed) {
       return;
     }
 
@@ -249,7 +256,7 @@ export default function ModelDetail() {
       navigate('/');
     } catch (error) {
       console.error('Error deleting model:', error);
-      alert('Failed to delete model.');
+      await showAlert('Deletion Failed', 'Failed to delete the model record from the database registry.', 'error');
     }
   };
 
