@@ -29,6 +29,10 @@ export default function ModelDetail() {
     name: '',
     scoreARI: '',
     scoreNMI: '',
+    scoreSilhouette: '',
+    scoreAMI: '',
+    scoreHomogeneity: '',
+    scoreVMeasure: '',
     descriptionMarkdown: '',
     architectureFlow: '',
     datasetSectionId: '',
@@ -123,8 +127,12 @@ export default function ModelDetail() {
   const startEditing = () => {
     setEditData({
       name: model.name,
-      scoreARI: model.scoreARI,
-      scoreNMI: model.scoreNMI,
+      scoreARI: model.scoreARI !== undefined && model.scoreARI !== null ? model.scoreARI : '',
+      scoreNMI: model.scoreNMI !== undefined && model.scoreNMI !== null ? model.scoreNMI : '',
+      scoreSilhouette: model.scoreSilhouette !== undefined && model.scoreSilhouette !== null ? model.scoreSilhouette : '',
+      scoreAMI: model.scoreAMI !== undefined && model.scoreAMI !== null ? model.scoreAMI : '',
+      scoreHomogeneity: model.scoreHomogeneity !== undefined && model.scoreHomogeneity !== null ? model.scoreHomogeneity : '',
+      scoreVMeasure: model.scoreVMeasure !== undefined && model.scoreVMeasure !== null ? model.scoreVMeasure : '',
       descriptionMarkdown: model.descriptionMarkdown,
       architectureFlow: model.architectureFlow || '',
       datasetSectionId: model.datasetSectionId?._id || model.datasetSectionId,
@@ -182,10 +190,29 @@ export default function ModelDetail() {
         finalImages = [...finalImages, ...uploadedUrls];
       }
 
+      const scoreARIVal = editData.scoreARI !== '' ? parseFloat(editData.scoreARI) : undefined;
+      const scoreNMIVal = editData.scoreNMI !== '' ? parseFloat(editData.scoreNMI) : undefined;
+      const scoreSilhouetteVal = editData.scoreSilhouette !== '' ? parseFloat(editData.scoreSilhouette) : undefined;
+
+      let count = 0;
+      if (scoreARIVal !== undefined && !isNaN(scoreARIVal)) count++;
+      if (scoreNMIVal !== undefined && !isNaN(scoreNMIVal)) count++;
+      if (scoreSilhouetteVal !== undefined && !isNaN(scoreSilhouetteVal)) count++;
+
+      if (count < 2) {
+        alert('Validation Error: You must provide at least two of the primary metrics (ARI, NMI, Silhouette) to save changes.');
+        setIsSaving(false);
+        return;
+      }
+
       const payload = {
         ...editData,
-        scoreARI: parseFloat(editData.scoreARI),
-        scoreNMI: parseFloat(editData.scoreNMI),
+        scoreARI: scoreARIVal,
+        scoreNMI: scoreNMIVal,
+        scoreSilhouette: scoreSilhouetteVal,
+        scoreAMI: editData.scoreAMI !== '' ? parseFloat(editData.scoreAMI) : undefined,
+        scoreHomogeneity: editData.scoreHomogeneity !== '' ? parseFloat(editData.scoreHomogeneity) : undefined,
+        scoreVMeasure: editData.scoreVMeasure !== '' ? parseFloat(editData.scoreVMeasure) : undefined,
         methodologyImages: finalImages
       };
 
@@ -200,7 +227,8 @@ export default function ModelDetail() {
       setImageFiles([]);
     } catch (error) {
       console.error('Error updating model:', error);
-      alert('Failed to update model. Please check authorization.');
+      const errMsg = error.response?.data?.message || 'Failed to update model. Please check authorization.';
+      alert(errMsg);
     } finally {
       setIsSaving(false);
     }
@@ -302,14 +330,48 @@ export default function ModelDetail() {
                   )}
                 </p>
               </div>
-              <div className="flex gap-4 self-stretch md:self-auto">
-                <div className="bg-surface-container-low border border-outline-border rounded-default p-4 text-center min-w-[110px] flex-1 md:flex-none shadow-sm">
-                  <div className="text-[10px] text-primary uppercase font-extrabold tracking-wider mb-1 font-outfit">ARI Score</div>
-                  <div className="text-3xl font-mono text-primary font-extrabold">{model.scoreARI?.toFixed(3)}</div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 w-full self-stretch md:self-auto md:w-auto">
+                <div className="bg-surface-container-low border border-outline-border rounded-default p-3 text-center min-w-[100px] shadow-sm">
+                  <div className="text-[9px] text-primary uppercase font-extrabold tracking-wider mb-1 font-outfit">ARI Score</div>
+                  <div className="text-xl sm:text-2xl font-mono text-primary font-extrabold">
+                    {model.scoreARI !== undefined && model.scoreARI !== null ? model.scoreARI.toFixed(3) : '-'}
+                  </div>
+                  <span className="text-[8px] text-on-surface-variant block">Gold standard</span>
                 </div>
-                <div className="bg-surface-container-low border border-outline-border rounded-default p-4 text-center min-w-[110px] flex-1 md:flex-none shadow-sm">
-                  <div className="text-[10px] text-secondary uppercase font-extrabold tracking-wider mb-1 font-outfit">NMI Score</div>
-                  <div className="text-3xl font-mono text-secondary font-extrabold">{model.scoreNMI?.toFixed(3)}</div>
+                <div className="bg-surface-container-low border border-outline-border rounded-default p-3 text-center min-w-[100px] shadow-sm">
+                  <div className="text-[9px] text-secondary uppercase font-extrabold tracking-wider mb-1 font-outfit">NMI Score</div>
+                  <div className="text-xl sm:text-2xl font-mono text-secondary font-extrabold">
+                    {model.scoreNMI !== undefined && model.scoreNMI !== null ? model.scoreNMI.toFixed(3) : '-'}
+                  </div>
+                  <span className="text-[8px] text-on-surface-variant block">Cluster agreement</span>
+                </div>
+                <div className="bg-surface-container-low border border-outline-border rounded-default p-3 text-center min-w-[100px] shadow-sm">
+                  <div className="text-[9px] text-tertiary uppercase font-extrabold tracking-wider mb-1 font-outfit">Silhouette</div>
+                  <div className="text-xl sm:text-2xl font-mono text-tertiary font-extrabold">
+                    {model.scoreSilhouette !== undefined && model.scoreSilhouette !== null ? model.scoreSilhouette.toFixed(3) : '-'}
+                  </div>
+                  <span className="text-[8px] text-on-surface-variant block">Cluster compact</span>
+                </div>
+                <div className={`bg-surface-container-low border border-outline-border rounded-default p-3 text-center min-w-[100px] shadow-sm ${model.scoreAMI === undefined || model.scoreAMI === null ? 'opacity-40' : ''}`}>
+                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 uppercase font-extrabold tracking-wider mb-1 font-outfit">AMI Score</div>
+                  <div className="text-xl sm:text-2xl font-mono text-emerald-600 dark:text-emerald-400 font-extrabold">
+                    {model.scoreAMI !== undefined && model.scoreAMI !== null ? model.scoreAMI.toFixed(3) : '-'}
+                  </div>
+                  <span className="text-[8px] text-on-surface-variant block">Robust mutual info</span>
+                </div>
+                <div className={`bg-surface-container-low border border-outline-border rounded-default p-3 text-center min-w-[100px] shadow-sm ${model.scoreHomogeneity === undefined || model.scoreHomogeneity === null ? 'opacity-40' : ''}`}>
+                  <div className="text-[9px] text-amber-600 dark:text-amber-500 uppercase font-extrabold tracking-wider mb-1 font-outfit">Homogeneity</div>
+                  <div className="text-xl sm:text-2xl font-mono text-amber-600 dark:text-amber-500 font-extrabold">
+                    {model.scoreHomogeneity !== undefined && model.scoreHomogeneity !== null ? model.scoreHomogeneity.toFixed(3) : '-'}
+                  </div>
+                  <span className="text-[8px] text-on-surface-variant block">Purity score</span>
+                </div>
+                <div className={`bg-surface-container-low border border-outline-border rounded-default p-3 text-center min-w-[100px] shadow-sm ${model.scoreVMeasure === undefined || model.scoreVMeasure === null ? 'opacity-40' : ''}`}>
+                  <div className="text-[9px] text-purple-600 dark:text-purple-400 uppercase font-extrabold tracking-wider mb-1 font-outfit">V-Measure</div>
+                  <div className="text-xl sm:text-2xl font-mono text-purple-600 dark:text-purple-400 font-extrabold">
+                    {model.scoreVMeasure !== undefined && model.scoreVMeasure !== null ? model.scoreVMeasure.toFixed(3) : '-'}
+                  </div>
+                  <span className="text-[8px] text-on-surface-variant block">Completeness bal</span>
                 </div>
               </div>
             </div>
@@ -463,33 +525,111 @@ export default function ModelDetail() {
                   </div>
                 )}
               </div>
-              
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">ARI Score</label>
-                <input 
-                  type="number" 
-                  step="0.001" 
-                  name="scoreARI" 
-                  value={editData.scoreARI} 
-                  onChange={handleEditChange} 
-                  required
-                  className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">NMI Score</label>
-                <input 
-                  type="number" 
-                  step="0.001" 
-                  name="scoreNMI" 
-                  value={editData.scoreNMI} 
-                  onChange={handleEditChange} 
-                  required
-                  className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
-                />
-              </div>
             </div>
+
+            {/* Performance Metrics Block in Edit Mode */}
+            <div className="bg-surface-container-low/40 p-4 rounded-default border border-outline-border/60 space-y-6">
+              <div>
+                <h3 className="text-sm font-bold text-on-surface font-outfit flex items-center gap-1.5">
+                  <span className="w-1.5 h-4.5 bg-primary rounded-full inline-block"></span>
+                  Primary Performance Metrics (At least 2 required)
+                </h3>
+                <p className="text-xs text-on-surface-variant/80 mt-1">
+                  You must provide at least two of the primary metrics (ARI, NMI, Silhouette) for your changes to be saved.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">ARI Score</label>
+                  <input 
+                    type="number" 
+                    step="0.0001" 
+                    name="scoreARI" 
+                    value={editData.scoreARI} 
+                    onChange={handleEditChange} 
+                    className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                  />
+                  <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Gold standard with GT labels</span>
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">NMI Score</label>
+                  <input 
+                    type="number" 
+                    step="0.0001" 
+                    name="scoreNMI" 
+                    value={editData.scoreNMI} 
+                    onChange={handleEditChange} 
+                    className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                  />
+                  <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Cluster agreement</span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Silhouette Score</label>
+                  <input 
+                    type="number" 
+                    step="0.0001" 
+                    name="scoreSilhouette" 
+                    value={editData.scoreSilhouette} 
+                    onChange={handleEditChange} 
+                    className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                  />
+                  <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Cluster compactness</span>
+                </div>
+              </div>
+
+              <div className="border-t border-outline-border/40 pt-4">
+                <h3 className="text-sm font-bold text-on-surface font-outfit flex items-center gap-1.5 mb-1">
+                  <span className="w-1.5 h-4.5 bg-secondary rounded-full inline-block"></span>
+                  Secondary Benchmarks (Optional)
+                </h3>
+                <p className="text-xs text-on-surface-variant/80 mb-4">
+                  Additional multi-omics parameters useful for profiling.
+                </p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">AMI Score</label>
+                    <input 
+                      type="number" 
+                      step="0.0001" 
+                      name="scoreAMI" 
+                      value={editData.scoreAMI} 
+                      onChange={handleEditChange} 
+                      className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                    />
+                    <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Robust mutual info</span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Homogeneity</label>
+                    <input 
+                      type="number" 
+                      step="0.0001" 
+                      name="scoreHomogeneity" 
+                      value={editData.scoreHomogeneity} 
+                      onChange={handleEditChange} 
+                      className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                    />
+                    <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Purity score</span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">V-Measure</label>
+                    <input 
+                      type="number" 
+                      step="0.0001" 
+                      name="scoreVMeasure" 
+                      value={editData.scoreVMeasure} 
+                      onChange={handleEditChange} 
+                      className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                    />
+                    <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Completeness balance</span>
+                  </div>
+                </div>
+              </div>
 
             <div>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">

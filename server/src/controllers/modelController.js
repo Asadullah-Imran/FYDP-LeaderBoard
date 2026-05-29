@@ -26,15 +26,32 @@ const getModelById = async (req, res) => {
 };
 
 const createModel = async (req, res) => {
-  const { name, datasetSectionId, scoreARI, scoreNMI, descriptionMarkdown, methodologyImages, architectureFlow, githubUrl } = req.body;
+  const { 
+    name, 
+    datasetSectionId, 
+    scoreARI, 
+    scoreNMI, 
+    scoreSilhouette,
+    scoreAMI,
+    scoreHomogeneity,
+    scoreVMeasure,
+    descriptionMarkdown, 
+    methodologyImages, 
+    architectureFlow, 
+    githubUrl 
+  } = req.body;
 
   try {
     const model = new ModelSubmission({
       name,
       authorId: req.user._id,
       datasetSectionId,
-      scoreARI,
-      scoreNMI,
+      scoreARI: scoreARI !== undefined && scoreARI !== '' ? parseFloat(scoreARI) : undefined,
+      scoreNMI: scoreNMI !== undefined && scoreNMI !== '' ? parseFloat(scoreNMI) : undefined,
+      scoreSilhouette: scoreSilhouette !== undefined && scoreSilhouette !== '' ? parseFloat(scoreSilhouette) : undefined,
+      scoreAMI: scoreAMI !== undefined && scoreAMI !== '' ? parseFloat(scoreAMI) : undefined,
+      scoreHomogeneity: scoreHomogeneity !== undefined && scoreHomogeneity !== '' ? parseFloat(scoreHomogeneity) : undefined,
+      scoreVMeasure: scoreVMeasure !== undefined && scoreVMeasure !== '' ? parseFloat(scoreVMeasure) : undefined,
       descriptionMarkdown,
       methodologyImages,
       architectureFlow,
@@ -44,9 +61,13 @@ const createModel = async (req, res) => {
     const createdModel = await model.save();
     res.status(201).json(createdModel);
   } catch (error) {
+    if (error.name === 'ValidationError' || error.message.includes('Validation failed')) {
+      return res.status(400).json({ message: error.message });
+    }
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
 
 const deleteModel = async (req, res) => {
   try {
@@ -69,7 +90,20 @@ const deleteModel = async (req, res) => {
 };
 
 const updateModel = async (req, res) => {
-  const { name, datasetSectionId, scoreARI, scoreNMI, descriptionMarkdown, methodologyImages, architectureFlow, githubUrl } = req.body;
+  const { 
+    name, 
+    datasetSectionId, 
+    scoreARI, 
+    scoreNMI, 
+    scoreSilhouette,
+    scoreAMI,
+    scoreHomogeneity,
+    scoreVMeasure,
+    descriptionMarkdown, 
+    methodologyImages, 
+    architectureFlow, 
+    githubUrl 
+  } = req.body;
 
   try {
     const model = await ModelSubmission.findById(req.params.id);
@@ -82,8 +116,12 @@ const updateModel = async (req, res) => {
 
       model.name = name || model.name;
       model.datasetSectionId = datasetSectionId || model.datasetSectionId;
-      model.scoreARI = scoreARI !== undefined ? scoreARI : model.scoreARI;
-      model.scoreNMI = scoreNMI !== undefined ? scoreNMI : model.scoreNMI;
+      model.scoreARI = scoreARI !== undefined ? (scoreARI !== '' ? parseFloat(scoreARI) : undefined) : model.scoreARI;
+      model.scoreNMI = scoreNMI !== undefined ? (scoreNMI !== '' ? parseFloat(scoreNMI) : undefined) : model.scoreNMI;
+      model.scoreSilhouette = scoreSilhouette !== undefined ? (scoreSilhouette !== '' ? parseFloat(scoreSilhouette) : undefined) : model.scoreSilhouette;
+      model.scoreAMI = scoreAMI !== undefined ? (scoreAMI !== '' ? parseFloat(scoreAMI) : undefined) : model.scoreAMI;
+      model.scoreHomogeneity = scoreHomogeneity !== undefined ? (scoreHomogeneity !== '' ? parseFloat(scoreHomogeneity) : undefined) : model.scoreHomogeneity;
+      model.scoreVMeasure = scoreVMeasure !== undefined ? (scoreVMeasure !== '' ? parseFloat(scoreVMeasure) : undefined) : model.scoreVMeasure;
       model.descriptionMarkdown = descriptionMarkdown !== undefined ? descriptionMarkdown : model.descriptionMarkdown;
       model.methodologyImages = methodologyImages || model.methodologyImages;
       model.architectureFlow = architectureFlow !== undefined ? architectureFlow : model.architectureFlow;
@@ -100,6 +138,9 @@ const updateModel = async (req, res) => {
       res.status(404).json({ message: 'Model not found' });
     }
   } catch (error) {
+    if (error.name === 'ValidationError' || error.message.includes('Validation failed')) {
+      return res.status(400).json({ message: error.message });
+    }
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

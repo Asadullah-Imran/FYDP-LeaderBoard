@@ -78,8 +78,20 @@ export default function Dashboard() {
         <div className="space-y-12">
           {nonEmptySections.map(section => {
             const sectionModels = models.filter(m => m.datasetSectionId?._id === section._id);
-            // Sort by ARI descending
-            sectionModels.sort((a, b) => b.scoreARI - a.scoreARI);
+            // Sort by ARI descending, fall back to NMI, then Silhouette
+            sectionModels.sort((a, b) => {
+              const valA = a.scoreARI !== undefined && a.scoreARI !== null ? a.scoreARI : -1;
+              const valB = b.scoreARI !== undefined && b.scoreARI !== null ? b.scoreARI : -1;
+              if (valB !== valA) return valB - valA;
+              
+              const nmiA = a.scoreNMI !== undefined && a.scoreNMI !== null ? a.scoreNMI : -1;
+              const nmiB = b.scoreNMI !== undefined && b.scoreNMI !== null ? b.scoreNMI : -1;
+              if (nmiB !== nmiA) return nmiB - nmiA;
+              
+              const silA = a.scoreSilhouette !== undefined && a.scoreSilhouette !== null ? a.scoreSilhouette : -1;
+              const silB = b.scoreSilhouette !== undefined && b.scoreSilhouette !== null ? b.scoreSilhouette : -1;
+              return silB - silA;
+            });
 
             return (
               <div 
@@ -98,11 +110,15 @@ export default function Dashboard() {
                   <table className="w-full text-left text-sm text-on-surface-variant border-collapse">
                     <thead className="bg-surface-container-low border-b border-outline-border text-xs uppercase font-semibold text-on-surface-variant tracking-wider font-outfit">
                       <tr>
-                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 w-20 sm:w-28">Rank</th>
+                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 w-16 sm:w-20">Rank</th>
                         <th className="px-3 sm:px-6 py-3.5 sm:py-4">Model Name</th>
                         <th className="px-3 sm:px-6 py-3.5 sm:py-4">Author</th>
-                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-bold text-primary">ARI</th>
-                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-bold text-secondary">NMI</th>
+                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-bold text-primary text-center">ARI</th>
+                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-bold text-secondary text-center">NMI</th>
+                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-bold text-tertiary text-center">Silh.</th>
+                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-semibold text-emerald-600 dark:text-emerald-400 text-center hidden md:table-cell">AMI</th>
+                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-semibold text-amber-600 dark:text-amber-500 text-center hidden lg:table-cell">Homog.</th>
+                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-semibold text-purple-600 dark:text-purple-400 text-center hidden lg:table-cell">V-Meas</th>
                         <th className="px-3 sm:px-6 py-3.5 sm:py-4 text-right">Action</th>
                       </tr>
                     </thead>
@@ -144,8 +160,24 @@ export default function Dashboard() {
                             </div>
                           </td>
                           <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium">{model.authorId?.name || 'Unknown'}</td>
-                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-primary font-bold text-xs sm:text-sm md:text-base">{model.scoreARI.toFixed(3)}</td>
-                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-secondary font-bold text-xs sm:text-sm md:text-base">{model.scoreNMI.toFixed(3)}</td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-primary font-bold text-center text-xs sm:text-sm">
+                            {model.scoreARI !== undefined && model.scoreARI !== null ? model.scoreARI.toFixed(3) : '-'}
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-secondary font-bold text-center text-xs sm:text-sm">
+                            {model.scoreNMI !== undefined && model.scoreNMI !== null ? model.scoreNMI.toFixed(3) : '-'}
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-tertiary font-bold text-center text-xs sm:text-sm">
+                            {model.scoreSilhouette !== undefined && model.scoreSilhouette !== null ? model.scoreSilhouette.toFixed(3) : '-'}
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-emerald-600 dark:text-emerald-400 font-semibold text-center text-xs sm:text-sm hidden md:table-cell">
+                            {model.scoreAMI !== undefined && model.scoreAMI !== null ? model.scoreAMI.toFixed(3) : '-'}
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-amber-600 dark:text-amber-500 font-semibold text-center text-xs sm:text-sm hidden lg:table-cell">
+                            {model.scoreHomogeneity !== undefined && model.scoreHomogeneity !== null ? model.scoreHomogeneity.toFixed(3) : '-'}
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-purple-600 dark:text-purple-400 font-semibold text-center text-xs sm:text-sm hidden lg:table-cell">
+                            {model.scoreVMeasure !== undefined && model.scoreVMeasure !== null ? model.scoreVMeasure.toFixed(3) : '-'}
+                          </td>
                           <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
                             <Link 
                               to={`/models/${model._id}`}

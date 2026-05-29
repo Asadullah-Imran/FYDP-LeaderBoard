@@ -15,6 +15,10 @@ export default function SubmitModel() {
     datasetSectionId: '',
     scoreARI: '',
     scoreNMI: '',
+    scoreSilhouette: '',
+    scoreAMI: '',
+    scoreHomogeneity: '',
+    scoreVMeasure: '',
     descriptionMarkdown: '',
     architectureFlow: '',
     githubUrl: '',
@@ -101,11 +105,31 @@ export default function SubmitModel() {
         imageUrls = await Promise.all(uploadPromises);
       }
 
+      // Client-side validation: count primary metrics
+      const scoreARIVal = formData.scoreARI !== '' ? parseFloat(formData.scoreARI) : undefined;
+      const scoreNMIVal = formData.scoreNMI !== '' ? parseFloat(formData.scoreNMI) : undefined;
+      const scoreSilhouetteVal = formData.scoreSilhouette !== '' ? parseFloat(formData.scoreSilhouette) : undefined;
+
+      let count = 0;
+      if (scoreARIVal !== undefined && !isNaN(scoreARIVal)) count++;
+      if (scoreNMIVal !== undefined && !isNaN(scoreNMIVal)) count++;
+      if (scoreSilhouetteVal !== undefined && !isNaN(scoreSilhouetteVal)) count++;
+
+      if (count < 2) {
+        alert('Validation Error: You must provide at least two of the primary metrics (ARI, NMI, Silhouette) to submit your model benchmarks.');
+        setIsSubmitting(false);
+        return;
+      }
+
       // Submit model
       const modelPayload = {
         ...formData,
-        scoreARI: parseFloat(formData.scoreARI),
-        scoreNMI: parseFloat(formData.scoreNMI),
+        scoreARI: scoreARIVal,
+        scoreNMI: scoreNMIVal,
+        scoreSilhouette: scoreSilhouetteVal,
+        scoreAMI: formData.scoreAMI !== '' ? parseFloat(formData.scoreAMI) : undefined,
+        scoreHomogeneity: formData.scoreHomogeneity !== '' ? parseFloat(formData.scoreHomogeneity) : undefined,
+        scoreVMeasure: formData.scoreVMeasure !== '' ? parseFloat(formData.scoreVMeasure) : undefined,
         methodologyImages: imageUrls
       };
 
@@ -118,7 +142,8 @@ export default function SubmitModel() {
       navigate('/');
     } catch (error) {
       console.error('Error submitting model:', error);
-      alert('Failed to submit model. Are you logged in?');
+      const errMsg = error.response?.data?.message || 'Failed to submit model. Are you logged in?';
+      alert(errMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -229,35 +254,117 @@ export default function SubmitModel() {
                 </div>
               )}
             </div>
-            
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">ARI Score</label>
-              <input 
-                type="number" 
-                step="0.001" 
-                name="scoreARI" 
-                placeholder="0.000"
-                value={formData.scoreARI} 
-                onChange={handleChange} 
-                required
-                className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">NMI Score</label>
-              <input 
-                type="number" 
-                step="0.001" 
-                name="scoreNMI" 
-                placeholder="0.000"
-                value={formData.scoreNMI} 
-                onChange={handleChange} 
-                required
-                className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
-              />
-            </div>
           </div>
+
+          {/* Performance Metrics Block */}
+          <div className="bg-surface-container-low/40 p-4 rounded-default border border-outline-border/60 space-y-6">
+            <div>
+              <h3 className="text-sm font-bold text-on-surface font-outfit flex items-center gap-1.5">
+                <span className="w-1.5 h-4.5 bg-primary rounded-full inline-block"></span>
+                Primary Performance Metrics (At least 2 required)
+              </h3>
+              <p className="text-xs text-on-surface-variant/80 mt-1">
+                You must provide at least two of the primary metrics (ARI, NMI, Silhouette) for a valid benchmark submission.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">ARI Score</label>
+                <input 
+                  type="number" 
+                  step="0.0001" 
+                  name="scoreARI" 
+                  placeholder="0.000"
+                  value={formData.scoreARI} 
+                  onChange={handleChange} 
+                  className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                />
+                <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Gold standard with GT labels</span>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">NMI Score</label>
+                <input 
+                  type="number" 
+                  step="0.0001" 
+                  name="scoreNMI" 
+                  placeholder="0.000"
+                  value={formData.scoreNMI} 
+                  onChange={handleChange} 
+                  className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                />
+                <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Cluster agreement</span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Silhouette Score</label>
+                <input 
+                  type="number" 
+                  step="0.0001" 
+                  name="scoreSilhouette" 
+                  placeholder="0.000"
+                  value={formData.scoreSilhouette} 
+                  onChange={handleChange} 
+                  className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                />
+                <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Cluster compactness</span>
+              </div>
+            </div>
+
+            <div className="border-t border-outline-border/40 pt-4">
+              <h3 className="text-sm font-bold text-on-surface font-outfit flex items-center gap-1.5 mb-1">
+                <span className="w-1.5 h-4.5 bg-secondary rounded-full inline-block"></span>
+                Secondary Benchmarks (Optional)
+              </h3>
+              <p className="text-xs text-on-surface-variant/80 mb-4">
+                Additional multi-omics parameters useful for profiling.
+              </p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">AMI Score</label>
+                  <input 
+                    type="number" 
+                    step="0.0001" 
+                    name="scoreAMI" 
+                    placeholder="0.000"
+                    value={formData.scoreAMI} 
+                    onChange={handleChange} 
+                    className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                  />
+                  <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Robust mutual info</span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Homogeneity</label>
+                  <input 
+                    type="number" 
+                    step="0.0001" 
+                    name="scoreHomogeneity" 
+                    placeholder="0.000"
+                    value={formData.scoreHomogeneity} 
+                    onChange={handleChange} 
+                    className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                  />
+                  <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Purity score</span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">V-Measure</label>
+                  <input 
+                    type="number" 
+                    step="0.0001" 
+                    name="scoreVMeasure" 
+                    placeholder="0.000"
+                    value={formData.scoreVMeasure} 
+                    onChange={handleChange} 
+                    className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                  />
+                  <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Completeness balance</span>
+                </div>
+              </div>
+            </div>
 
           <div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">

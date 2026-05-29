@@ -598,13 +598,14 @@ export default function AdminPanel() {
                     <th className="px-4 py-3.5">Dataset Section</th>
                     <th className="px-4 py-3.5 text-center">ARI</th>
                     <th className="px-4 py-3.5 text-center">NMI</th>
+                    <th className="px-4 py-3.5 text-center">Silh.</th>
                     <th className="px-4 py-3.5 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-border text-on-surface-variant">
                   {filteredModels.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="px-4 py-8 text-center italic text-xs">
+                      <td colSpan={7} className="px-4 py-8 text-center italic text-xs">
                         No submissions located in leaderboards matching search criteria.
                       </td>
                     </tr>
@@ -621,8 +622,15 @@ export default function AdminPanel() {
                             {item.datasetSectionId?.name || 'Deleted Section'}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-center font-mono font-bold text-primary text-xs sm:text-sm">{item.scoreARI?.toFixed(3)}</td>
-                        <td className="px-4 py-3 text-center font-mono font-bold text-secondary text-xs sm:text-sm">{item.scoreNMI?.toFixed(3)}</td>
+                        <td className="px-4 py-3 text-center font-mono font-bold text-primary text-xs sm:text-sm">
+                          {item.scoreARI !== undefined && item.scoreARI !== null ? item.scoreARI.toFixed(3) : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-center font-mono font-bold text-secondary text-xs sm:text-sm">
+                          {item.scoreNMI !== undefined && item.scoreNMI !== null ? item.scoreNMI.toFixed(3) : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-center font-mono font-bold text-tertiary text-xs sm:text-sm">
+                          {item.scoreSilhouette !== undefined && item.scoreSilhouette !== null ? item.scoreSilhouette.toFixed(3) : '-'}
+                        </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex justify-end gap-1.5">
                             <Link
