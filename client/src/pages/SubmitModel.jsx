@@ -365,6 +365,7 @@ export default function SubmitModel() {
                 </div>
               </div>
             </div>
+          </div>
 
           <div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
