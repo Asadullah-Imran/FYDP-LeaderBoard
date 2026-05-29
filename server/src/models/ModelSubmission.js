@@ -33,7 +33,7 @@ const modelSubmissionSchema = new mongoose.Schema({
   
 }, { timestamps: true });
 
-modelSubmissionSchema.pre('validate', function(next) {
+modelSubmissionSchema.pre('validate', function() {
   // Clear out any nulls or empty strings
   if (this.scoreARI === null || this.scoreARI === '') this.scoreARI = undefined;
   if (this.scoreNMI === null || this.scoreNMI === '') this.scoreNMI = undefined;
@@ -48,9 +48,7 @@ modelSubmissionSchema.pre('validate', function(next) {
   if (typeof this.scoreSilhouette === 'number' && !isNaN(this.scoreSilhouette)) count++;
 
   if (count < 2) {
-    next(new Error('Validation failed: You must provide at least two of the primary metrics (ARI, NMI, Silhouette).'));
-  } else {
-    next();
+    throw new Error('Validation failed: You must provide at least two of the primary metrics (ARI, NMI, Silhouette).');
   }
 });
 
