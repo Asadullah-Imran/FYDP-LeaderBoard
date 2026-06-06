@@ -54,9 +54,6 @@ export default function Dashboard() {
                     <th className="px-6 py-4 w-20"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></th>
                     <th className="px-6 py-4 w-20"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></th>
                     <th className="px-6 py-4 w-20"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></th>
-                    <th className="px-6 py-4 w-24 hidden md:table-cell"><div className="h-4 bg-surface-container-high rounded w-12 mx-auto"></div></th>
-                    <th className="px-6 py-4 w-24 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-12 mx-auto"></div></th>
-                    <th className="px-6 py-4 w-24 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-12 mx-auto"></div></th>
                     <th className="px-6 py-4 text-right"><div className="h-4 bg-surface-container-high rounded w-12 ml-auto"></div></th>
                   </tr>
                 </thead>
@@ -70,9 +67,6 @@ export default function Dashboard() {
                       <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
                       <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
                       <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
-                      <td className="px-6 py-4 hidden md:table-cell"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
-                      <td className="px-6 py-4 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
-                      <td className="px-6 py-4 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
                       <td className="px-6 py-4 text-right"><div className="h-4 bg-surface-container-high rounded w-14 ml-auto"></div></td>
                     </tr>
                   ))}
@@ -101,9 +95,6 @@ export default function Dashboard() {
                     <th className="px-6 py-4 w-20"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></th>
                     <th className="px-6 py-4 w-20"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></th>
                     <th className="px-6 py-4 w-20"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></th>
-                    <th className="px-6 py-4 w-24 hidden md:table-cell"><div className="h-4 bg-surface-container-high rounded w-12 mx-auto"></div></th>
-                    <th className="px-6 py-4 w-24 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-12 mx-auto"></div></th>
-                    <th className="px-6 py-4 w-24 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-12 mx-auto"></div></th>
                     <th className="px-6 py-4 text-right"><div className="h-4 bg-surface-container-high rounded w-12 ml-auto"></div></th>
                   </tr>
                 </thead>
@@ -117,9 +108,6 @@ export default function Dashboard() {
                       <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
                       <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
                       <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
-                      <td className="px-6 py-4 hidden md:table-cell"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
-                      <td className="px-6 py-4 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
-                      <td className="px-6 py-4 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
                       <td className="px-6 py-4 text-right"><div className="h-4 bg-surface-container-high rounded w-14 ml-auto"></div></td>
                     </tr>
                   ))}
@@ -224,9 +212,6 @@ export default function Dashboard() {
                         <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-bold text-primary text-center">ARI</th>
                         <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-bold text-secondary text-center">NMI</th>
                         <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-bold text-tertiary text-center">Silh.</th>
-                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-semibold text-emerald-600 dark:text-emerald-400 text-center hidden md:table-cell">AMI</th>
-                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-semibold text-amber-600 dark:text-amber-500 text-center hidden lg:table-cell">Homog.</th>
-                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-semibold text-purple-600 dark:text-purple-400 text-center hidden lg:table-cell">V-Meas</th>
                         <th className="px-3 sm:px-6 py-3.5 sm:py-4 text-right">Action</th>
                       </tr>
                     </thead>
@@ -280,15 +265,7 @@ export default function Dashboard() {
                           <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-tertiary font-bold text-center text-xs sm:text-sm">
                             {model.scoreSilhouette !== undefined && model.scoreSilhouette !== null ? model.scoreSilhouette.toFixed(3) : '-'}
                           </td>
-                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-emerald-600 dark:text-emerald-400 font-semibold text-center text-xs sm:text-sm hidden md:table-cell">
-                            {model.scoreAMI !== undefined && model.scoreAMI !== null ? model.scoreAMI.toFixed(3) : '-'}
-                          </td>
-                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-amber-600 dark:text-amber-500 font-semibold text-center text-xs sm:text-sm hidden lg:table-cell">
-                            {model.scoreHomogeneity !== undefined && model.scoreHomogeneity !== null ? model.scoreHomogeneity.toFixed(3) : '-'}
-                          </td>
-                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-purple-600 dark:text-purple-400 font-semibold text-center text-xs sm:text-sm hidden lg:table-cell">
-                            {model.scoreVMeasure !== undefined && model.scoreVMeasure !== null ? model.scoreVMeasure.toFixed(3) : '-'}
-                          </td>
+
                           <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
                             <Link 
                               to={`/models/${model._id}`}
