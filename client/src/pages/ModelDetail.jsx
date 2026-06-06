@@ -43,6 +43,8 @@ export default function ModelDetail() {
     clusterSize: ''
   });
 
+  const [editResults, setEditResults] = useState([]);
+
   // Searchable dropdown inside edit mode
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dropdownSearch, setDropdownSearch] = useState('');
@@ -126,8 +128,6 @@ export default function ModelDetail() {
   }
 
   const canManage = user && (user._id === model.authorId?._id || user._id === model.authorId || user.role === 'admin');
-
-  const [editResults, setEditResults] = useState([]);
 
   const startEditing = () => {
     setEditData({
