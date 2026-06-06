@@ -32,15 +32,6 @@ export default function Dashboard() {
     models.some(m => m.datasetSectionId?._id === section._id)
   );
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <div className="h-10 w-10 border-4 border-primary-container border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-on-surface-variant font-medium text-sm animate-pulse">Loading bioinformatics benchmark statistics...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full space-y-12">
       {/* Hero Header Section */}
@@ -57,7 +48,105 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {nonEmptySections.length === 0 ? (
+      {loading ? (
+        <div className="space-y-12 animate-pulse">
+          {/* Skeleton Card 1 */}
+          <div className="bg-surface-container-lowest border border-outline-border rounded-lg p-6 md:p-8 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/30 to-primary-container/30"></div>
+            
+            {/* Title Skeleton */}
+            <div className="flex items-center gap-2.5 mb-6">
+              <div className="w-1.5 h-7 bg-primary-container/20 rounded-full"></div>
+              <div className="h-6 bg-surface-container-high rounded w-48"></div>
+            </div>
+            
+            {/* Table Skeleton */}
+            <div className="overflow-x-auto rounded-default border border-outline-border bg-surface-container-lowest">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-surface-container-low border-b border-outline-border h-12">
+                    <th className="px-6 py-4 w-20"><div className="h-4 bg-surface-container-high rounded w-8"></div></th>
+                    <th className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-32"></div></th>
+                    <th className="px-6 py-4 w-24"><div className="h-4 bg-surface-container-high rounded w-16 mx-auto"></div></th>
+                    <th className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-20"></div></th>
+                    <th className="px-6 py-4 w-20"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></th>
+                    <th className="px-6 py-4 w-20"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></th>
+                    <th className="px-6 py-4 w-20"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></th>
+                    <th className="px-6 py-4 w-24 hidden md:table-cell"><div className="h-4 bg-surface-container-high rounded w-12 mx-auto"></div></th>
+                    <th className="px-6 py-4 w-24 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-12 mx-auto"></div></th>
+                    <th className="px-6 py-4 w-24 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-12 mx-auto"></div></th>
+                    <th className="px-6 py-4 text-right"><div className="h-4 bg-surface-container-high rounded w-12 ml-auto"></div></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-outline-border">
+                  {[1, 2, 3].map((i) => (
+                    <tr key={i} className="h-16">
+                      <td className="px-6 py-4"><div className="h-6 w-12 bg-surface-container-high rounded-full"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-40"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-8 mx-auto"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-24"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
+                      <td className="px-6 py-4 hidden md:table-cell"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
+                      <td className="px-6 py-4 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
+                      <td className="px-6 py-4 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
+                      <td className="px-6 py-4 text-right"><div className="h-4 bg-surface-container-high rounded w-14 ml-auto"></div></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          {/* Skeleton Card 2 */}
+          <div className="bg-surface-container-lowest border border-outline-border rounded-lg p-6 md:p-8 shadow-sm relative overflow-hidden opacity-60">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/30 to-primary-container/30"></div>
+            
+            <div className="flex items-center gap-2.5 mb-6">
+              <div className="w-1.5 h-7 bg-primary-container/20 rounded-full"></div>
+              <div className="h-6 bg-surface-container-high rounded w-36"></div>
+            </div>
+            
+            <div className="overflow-x-auto rounded-default border border-outline-border bg-surface-container-lowest">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-surface-container-low border-b border-outline-border h-12">
+                    <th className="px-6 py-4 w-20"><div className="h-4 bg-surface-container-high rounded w-8"></div></th>
+                    <th className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-32"></div></th>
+                    <th className="px-6 py-4 w-24"><div className="h-4 bg-surface-container-high rounded w-16 mx-auto"></div></th>
+                    <th className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-20"></div></th>
+                    <th className="px-6 py-4 w-20"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></th>
+                    <th className="px-6 py-4 w-20"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></th>
+                    <th className="px-6 py-4 w-20"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></th>
+                    <th className="px-6 py-4 w-24 hidden md:table-cell"><div className="h-4 bg-surface-container-high rounded w-12 mx-auto"></div></th>
+                    <th className="px-6 py-4 w-24 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-12 mx-auto"></div></th>
+                    <th className="px-6 py-4 w-24 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-12 mx-auto"></div></th>
+                    <th className="px-6 py-4 text-right"><div className="h-4 bg-surface-container-high rounded w-12 ml-auto"></div></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-outline-border">
+                  {[1, 2].map((i) => (
+                    <tr key={i} className="h-16">
+                      <td className="px-6 py-4"><div className="h-6 w-12 bg-surface-container-high rounded-full"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-40"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-8 mx-auto"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-24"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
+                      <td className="px-6 py-4 hidden md:table-cell"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
+                      <td className="px-6 py-4 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
+                      <td className="px-6 py-4 hidden lg:table-cell"><div className="h-4 bg-surface-container-high rounded w-10 mx-auto"></div></td>
+                      <td className="px-6 py-4 text-right"><div className="h-4 bg-surface-container-high rounded w-14 ml-auto"></div></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      ) : nonEmptySections.length === 0 ? (
         <div className="text-center py-16 bg-surface-container-lowest border border-dashed border-outline-variant rounded-lg max-w-2xl mx-auto p-8 shadow-sm">
           <AlertCircle className="h-12 w-12 text-outline mx-auto mb-4 animate-bounce" />
           <p className="text-lg font-bold text-on-surface">No Benchmark Models Submitted Yet</p>
