@@ -11,6 +11,7 @@ export default function Login() {
   const { showAlert } = usePopup();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -20,6 +21,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       const endpoint = isLogin ? '/login' : '/register';
       const { data } = await axios.post(`${API_URL}${endpoint}`, formData);
@@ -30,6 +32,8 @@ export default function Login() {
       console.error('Auth Error:', error);
       const errMsg = error.response?.data?.message || 'Authentication failed. Please verify credentials.';
       await showAlert('Authentication Error', errMsg, 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -60,7 +64,8 @@ export default function Login() {
               placeholder="e.g. Dr. Jane Doe"
               onChange={handleChange} 
               required={!isLogin}
-              className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm"
+              disabled={submitting}
+              className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
         )}
@@ -76,7 +81,8 @@ export default function Login() {
             placeholder="researcher@institute.edu"
             onChange={handleChange} 
             required
-            className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm"
+            disabled={submitting}
+            className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
         
@@ -91,15 +97,22 @@ export default function Login() {
             placeholder="••••••••"
             onChange={handleChange} 
             required
-            className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm"
+            disabled={submitting}
+            className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
         
         <button 
           type="submit" 
-          className="w-full bg-primary-container hover:bg-primary-container/90 text-white font-bold py-2.5 px-4 rounded-default mt-6 transition-colors cursor-pointer flex items-center justify-center gap-1.5 text-sm"
+          disabled={submitting}
+          className="w-full bg-primary-container hover:bg-primary-container/90 text-white font-bold py-2.5 px-4 rounded-default mt-6 transition-colors cursor-pointer flex items-center justify-center gap-1.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLogin ? (
+          {submitting ? (
+            <>
+              <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              {isLogin ? 'Signing In...' : 'Registering...'}
+            </>
+          ) : isLogin ? (
             <>
               Sign In
               <ArrowRight className="h-4 w-4" />
@@ -117,8 +130,9 @@ export default function Login() {
         {isLogin ? "Don't have a benchmarking account? " : "Already registered? "}
         <button 
           type="button"
-          onClick={() => setIsLogin(!isLogin)} 
-          className="text-primary-container hover:text-primary font-bold hover:underline cursor-pointer transition-colors"
+          onClick={() => !submitting && setIsLogin(!isLogin)} 
+          disabled={submitting}
+          className="text-primary-container hover:text-primary font-bold hover:underline cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLogin ? 'Register Here' : 'Login Here'}
         </button>
