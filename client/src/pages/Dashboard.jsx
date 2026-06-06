@@ -77,7 +77,43 @@ export default function Dashboard() {
       ) : (
         <div className="space-y-12">
           {nonEmptySections.map(section => {
-            const sectionModels = models.filter(m => m.datasetSectionId?._id === section._id);
+            const sectionModels = [];
+            models.forEach(model => {
+              if (model.datasetSectionId?._id !== section._id) return;
+              
+              if (model.results && model.results.length > 0) {
+                model.results.forEach(res => {
+                  sectionModels.push({
+                    _id: model._id,
+                    resultKey: `${model._id}-${res.clusterSize}`,
+                    name: model.name,
+                    authorId: model.authorId,
+                    clusterSize: res.clusterSize,
+                    scoreARI: res.scoreARI,
+                    scoreNMI: res.scoreNMI,
+                    scoreSilhouette: res.scoreSilhouette,
+                    scoreAMI: res.scoreAMI,
+                    scoreHomogeneity: res.scoreHomogeneity,
+                    scoreVMeasure: res.scoreVMeasure
+                  });
+                });
+              } else {
+                sectionModels.push({
+                  _id: model._id,
+                  resultKey: `${model._id}-legacy`,
+                  name: model.name,
+                  authorId: model.authorId,
+                  clusterSize: model.clusterSize,
+                  scoreARI: model.scoreARI,
+                  scoreNMI: model.scoreNMI,
+                  scoreSilhouette: model.scoreSilhouette,
+                  scoreAMI: model.scoreAMI,
+                  scoreHomogeneity: model.scoreHomogeneity,
+                  scoreVMeasure: model.scoreVMeasure
+                });
+              }
+            });
+
             // Sort by ARI descending, fall back to NMI, then Silhouette
             sectionModels.sort((a, b) => {
               const valA = a.scoreARI !== undefined && a.scoreARI !== null ? a.scoreARI : -1;
@@ -112,6 +148,7 @@ export default function Dashboard() {
                       <tr>
                         <th className="px-3 sm:px-6 py-3.5 sm:py-4 w-16 sm:w-20">Rank</th>
                         <th className="px-3 sm:px-6 py-3.5 sm:py-4">Model Name</th>
+                        <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-semibold text-center w-24">Clusters</th>
                         <th className="px-3 sm:px-6 py-3.5 sm:py-4">Author</th>
                         <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-bold text-primary text-center">ARI</th>
                         <th className="px-3 sm:px-6 py-3.5 sm:py-4 font-bold text-secondary text-center">NMI</th>
@@ -125,7 +162,7 @@ export default function Dashboard() {
                     <tbody className="divide-y divide-outline-border">
                       {sectionModels.map((model, index) => (
                         <tr 
-                          key={model._id} 
+                          key={model.resultKey} 
                           className="hover:bg-primary-container/[0.04] transition-all group relative"
                         >
                           <td className="px-3 sm:px-6 py-3 sm:py-4 font-semibold relative">
@@ -158,6 +195,9 @@ export default function Dashboard() {
                               <Cpu className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-container/85 shrink-0" />
                               <span className="truncate max-w-[120px] sm:max-w-none">{model.name}</span>
                             </div>
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono font-bold text-center text-xs sm:text-sm text-secondary">
+                            {model.clusterSize !== undefined && model.clusterSize !== null ? model.clusterSize : '-'}
                           </td>
                           <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium">{model.authorId?.name || 'Unknown'}</td>
                           <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-primary font-bold text-center text-xs sm:text-sm">

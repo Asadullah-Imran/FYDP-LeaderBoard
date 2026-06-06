@@ -234,7 +234,44 @@ export default function AdminPanel() {
     u.email.toLowerCase().includes(searchUser.toLowerCase())
   );
 
-  const filteredModels = models.filter(m => 
+  const flattenedModels = [];
+  models.forEach(model => {
+    if (model.results && model.results.length > 0) {
+      model.results.forEach(res => {
+        flattenedModels.push({
+          _id: model._id,
+          resultKey: `${model._id}-${res.clusterSize}`,
+          name: model.name,
+          authorId: model.authorId,
+          datasetSectionId: model.datasetSectionId,
+          clusterSize: res.clusterSize,
+          scoreARI: res.scoreARI,
+          scoreNMI: res.scoreNMI,
+          scoreSilhouette: res.scoreSilhouette,
+          scoreAMI: res.scoreAMI,
+          scoreHomogeneity: res.scoreHomogeneity,
+          scoreVMeasure: res.scoreVMeasure
+        });
+      });
+    } else {
+      flattenedModels.push({
+        _id: model._id,
+        resultKey: `${model._id}-legacy`,
+        name: model.name,
+        authorId: model.authorId,
+        datasetSectionId: model.datasetSectionId,
+        clusterSize: model.clusterSize,
+        scoreARI: model.scoreARI,
+        scoreNMI: model.scoreNMI,
+        scoreSilhouette: model.scoreSilhouette,
+        scoreAMI: model.scoreAMI,
+        scoreHomogeneity: model.scoreHomogeneity,
+        scoreVMeasure: model.scoreVMeasure
+      });
+    }
+  });
+
+  const filteredModels = flattenedModels.filter(m => 
     m.name.toLowerCase().includes(searchModel.toLowerCase()) ||
     (m.authorId?.name || '').toLowerCase().includes(searchModel.toLowerCase())
   );
@@ -615,6 +652,7 @@ export default function AdminPanel() {
                 <thead className="bg-surface-container-low border-b border-outline-border text-xs uppercase font-semibold text-on-surface-variant tracking-wider font-outfit">
                   <tr>
                     <th className="px-4 py-3.5">Model Name</th>
+                    <th className="px-4 py-3.5 text-center">Clusters</th>
                     <th className="px-4 py-3.5">Author</th>
                     <th className="px-4 py-3.5">Dataset Section</th>
                     <th className="px-4 py-3.5 text-center">ARI</th>
@@ -626,16 +664,19 @@ export default function AdminPanel() {
                 <tbody className="divide-y divide-outline-border text-on-surface-variant">
                   {filteredModels.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-8 text-center italic text-xs">
+                      <td colSpan={8} className="px-4 py-8 text-center italic text-xs">
                         No submissions located in leaderboards matching search criteria.
                       </td>
                     </tr>
                   ) : (
                     filteredModels.map((item) => (
-                      <tr key={item._id} className="hover:bg-primary/5 transition-colors">
+                      <tr key={item.resultKey} className="hover:bg-primary/5 transition-colors">
                         <td className="px-4 py-3 font-bold text-on-surface text-xs sm:text-sm flex items-center gap-2">
                           <Cpu className="h-4 w-4 text-primary shrink-0" />
                           <span className="truncate max-w-[120px] sm:max-w-none">{item.name}</span>
+                        </td>
+                        <td className="px-4 py-3 text-center font-mono font-bold text-secondary text-xs sm:text-sm">
+                          {item.clusterSize !== undefined && item.clusterSize !== null ? item.clusterSize : '-'}
                         </td>
                         <td className="px-4 py-3 text-xs font-semibold">{item.authorId?.name || 'Deleted Account'}</td>
                         <td className="px-4 py-3 text-xs">

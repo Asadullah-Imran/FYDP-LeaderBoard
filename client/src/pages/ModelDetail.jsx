@@ -127,22 +127,39 @@ export default function ModelDetail() {
 
   const canManage = user && (user._id === model.authorId?._id || user._id === model.authorId || user.role === 'admin');
 
+  const [editResults, setEditResults] = useState([]);
+
   const startEditing = () => {
     setEditData({
       name: model.name,
-      scoreARI: model.scoreARI !== undefined && model.scoreARI !== null ? model.scoreARI : '',
-      scoreNMI: model.scoreNMI !== undefined && model.scoreNMI !== null ? model.scoreNMI : '',
-      scoreSilhouette: model.scoreSilhouette !== undefined && model.scoreSilhouette !== null ? model.scoreSilhouette : '',
-      scoreAMI: model.scoreAMI !== undefined && model.scoreAMI !== null ? model.scoreAMI : '',
-      scoreHomogeneity: model.scoreHomogeneity !== undefined && model.scoreHomogeneity !== null ? model.scoreHomogeneity : '',
-      scoreVMeasure: model.scoreVMeasure !== undefined && model.scoreVMeasure !== null ? model.scoreVMeasure : '',
       descriptionMarkdown: model.descriptionMarkdown,
       architectureFlow: model.architectureFlow || '',
       datasetSectionId: model.datasetSectionId?._id || model.datasetSectionId,
       methodologyImages: model.methodologyImages || [],
-      githubUrl: model.githubUrl || '',
-      clusterSize: model.clusterSize !== undefined && model.clusterSize !== null ? model.clusterSize : ''
+      githubUrl: model.githubUrl || ''
     });
+
+    const initialResults = model.results && model.results.length > 0
+      ? model.results.map(res => ({
+          clusterSize: res.clusterSize !== undefined && res.clusterSize !== null ? res.clusterSize.toString() : '',
+          scoreARI: res.scoreARI !== undefined && res.scoreARI !== null ? res.scoreARI.toString() : '',
+          scoreNMI: res.scoreNMI !== undefined && res.scoreNMI !== null ? res.scoreNMI.toString() : '',
+          scoreSilhouette: res.scoreSilhouette !== undefined && res.scoreSilhouette !== null ? res.scoreSilhouette.toString() : '',
+          scoreAMI: res.scoreAMI !== undefined && res.scoreAMI !== null ? res.scoreAMI.toString() : '',
+          scoreHomogeneity: res.scoreHomogeneity !== undefined && res.scoreHomogeneity !== null ? res.scoreHomogeneity.toString() : '',
+          scoreVMeasure: res.scoreVMeasure !== undefined && res.scoreVMeasure !== null ? res.scoreVMeasure.toString() : '',
+        }))
+      : [{
+          clusterSize: model.clusterSize !== undefined && model.clusterSize !== null ? model.clusterSize.toString() : '',
+          scoreARI: model.scoreARI !== undefined && model.scoreARI !== null ? model.scoreARI.toString() : '',
+          scoreNMI: model.scoreNMI !== undefined && model.scoreNMI !== null ? model.scoreNMI.toString() : '',
+          scoreSilhouette: model.scoreSilhouette !== undefined && model.scoreSilhouette !== null ? model.scoreSilhouette.toString() : '',
+          scoreAMI: model.scoreAMI !== undefined && model.scoreAMI !== null ? model.scoreAMI.toString() : '',
+          scoreHomogeneity: model.scoreHomogeneity !== undefined && model.scoreHomogeneity !== null ? model.scoreHomogeneity.toString() : '',
+          scoreVMeasure: model.scoreVMeasure !== undefined && model.scoreVMeasure !== null ? model.scoreVMeasure.toString() : '',
+        }];
+
+    setEditResults(initialResults);
     setImageFiles([]);
     setIsEditing(true);
     setEditTab('write');
@@ -155,6 +172,32 @@ export default function ModelDetail() {
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditResultChange = (index, field, value) => {
+    setEditResults((prev) =>
+      prev.map((res, i) => (i === index ? { ...res, [field]: value } : res))
+    );
+  };
+
+  const handleAddEditResult = () => {
+    setEditResults((prev) => [
+      ...prev,
+      {
+        clusterSize: '',
+        scoreARI: '',
+        scoreNMI: '',
+        scoreSilhouette: '',
+        scoreAMI: '',
+        scoreHomogeneity: '',
+        scoreVMeasure: ''
+      }
+    ]);
+  };
+
+  const handleRemoveEditResult = (index) => {
+    if (editResults.length <= 1) return;
+    setEditResults((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleImageChange = (e) => {
@@ -194,36 +237,62 @@ export default function ModelDetail() {
         finalImages = [...finalImages, ...uploadedUrls];
       }
 
-      const scoreARIVal = editData.scoreARI !== '' ? parseFloat(editData.scoreARI) : undefined;
-      const scoreNMIVal = editData.scoreNMI !== '' ? parseFloat(editData.scoreNMI) : undefined;
-      const scoreSilhouetteVal = editData.scoreSilhouette !== '' ? parseFloat(editData.scoreSilhouette) : undefined;
-
-      let count = 0;
-      if (scoreARIVal !== undefined && !isNaN(scoreARIVal)) count++;
-      if (scoreNMIVal !== undefined && !isNaN(scoreNMIVal)) count++;
-      if (scoreSilhouetteVal !== undefined && !isNaN(scoreSilhouetteVal)) count++;
-
-      if (count < 2) {
-        await showAlert('Validation Error', 'You must provide at least two of the primary metrics (ARI, NMI, Silhouette) to save changes.', 'warning');
+      // Validation
+      if (editResults.length === 0) {
+        await showAlert('Validation Error', 'You must provide at least one cluster size evaluation.', 'warning');
         setIsSaving(false);
         return;
       }
 
-      if (!editData.clusterSize || isNaN(parseInt(editData.clusterSize)) || parseInt(editData.clusterSize) <= 0) {
-        await showAlert('Validation Error', 'You must provide a valid positive integer for Cluster Size.', 'warning');
-        setIsSaving(false);
-        return;
+      const parsedResults = [];
+      const seenClusterSizes = new Set();
+
+      for (let i = 0; i < editResults.length; i++) {
+        const res = editResults[i];
+        
+        if (!res.clusterSize || isNaN(parseInt(res.clusterSize)) || parseInt(res.clusterSize) <= 0) {
+          await showAlert('Validation Error', `Cluster size for evaluation #${i + 1} must be a valid positive integer.`, 'warning');
+          setIsSaving(false);
+          return;
+        }
+
+        const sizeVal = parseInt(res.clusterSize);
+        if (seenClusterSizes.has(sizeVal)) {
+          await showAlert('Validation Error', `Duplicate cluster size ${sizeVal} detected in evaluations.`, 'warning');
+          setIsSaving(false);
+          return;
+        }
+        seenClusterSizes.add(sizeVal);
+
+        const scoreARIVal = res.scoreARI !== '' ? parseFloat(res.scoreARI) : undefined;
+        const scoreNMIVal = res.scoreNMI !== '' ? parseFloat(res.scoreNMI) : undefined;
+        const scoreSilhouetteVal = res.scoreSilhouette !== '' ? parseFloat(res.scoreSilhouette) : undefined;
+
+        let count = 0;
+        if (scoreARIVal !== undefined && !isNaN(scoreARIVal)) count++;
+        if (scoreNMIVal !== undefined && !isNaN(scoreNMIVal)) count++;
+        if (scoreSilhouetteVal !== undefined && !isNaN(scoreSilhouetteVal)) count++;
+
+        if (count < 2) {
+          await showAlert('Validation Error', `Evaluation with Cluster Size ${sizeVal} must have at least two of the primary metrics (ARI, NMI, Silhouette).`, 'warning');
+          setIsSaving(false);
+          return;
+        }
+
+        parsedResults.push({
+          clusterSize: sizeVal,
+          scoreARI: scoreARIVal,
+          scoreNMI: scoreNMIVal,
+          scoreSilhouette: scoreSilhouetteVal,
+          scoreAMI: res.scoreAMI !== '' ? parseFloat(res.scoreAMI) : undefined,
+          scoreHomogeneity: res.scoreHomogeneity !== '' ? parseFloat(res.scoreHomogeneity) : undefined,
+          scoreVMeasure: res.scoreVMeasure !== '' ? parseFloat(res.scoreVMeasure) : undefined,
+        });
       }
 
       const payload = {
         ...editData,
-        scoreARI: scoreARIVal,
-        scoreNMI: scoreNMIVal,
-        scoreSilhouette: scoreSilhouetteVal,
-        scoreAMI: editData.scoreAMI !== '' ? parseFloat(editData.scoreAMI) : undefined,
-        scoreHomogeneity: editData.scoreHomogeneity !== '' ? parseFloat(editData.scoreHomogeneity) : undefined,
-        scoreVMeasure: editData.scoreVMeasure !== '' ? parseFloat(editData.scoreVMeasure) : undefined,
-        clusterSize: parseInt(editData.clusterSize),
+        results: parsedResults,
         methodologyImages: finalImages
       };
 
@@ -327,8 +396,7 @@ export default function ModelDetail() {
                 <p className="text-sm text-on-surface-variant flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span>
                     Submitted by <span className="text-on-surface font-bold">{model.authorId?.name || 'Unknown'}</span> for dataset 
-                    <span className="text-primary font-bold ml-1">{model.datasetSectionId?.name || 'Deleted Section'}</span> with 
-                    <span className="text-secondary font-bold ml-1">{model.clusterSize} clusters</span>
+                    <span className="text-primary font-bold ml-1">{model.datasetSectionId?.name || 'Deleted Section'}</span>
                   </span>
                   {model.githubUrl && (
                     <>
@@ -347,48 +415,75 @@ export default function ModelDetail() {
                   )}
                 </p>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3.5 w-full">
-                <div className="bg-surface-container-low hover:translate-y-[-2px] hover:shadow-md border border-outline-border/60 rounded-default p-3.5 text-center transition-all duration-300 shadow-sm cursor-default">
-                  <div className="text-[9px] text-primary uppercase font-extrabold tracking-wider mb-1.5 font-outfit">ARI Score</div>
-                  <div className="text-xl sm:text-2xl font-mono text-primary font-extrabold">
-                    {model.scoreARI !== undefined && model.scoreARI !== null ? model.scoreARI.toFixed(3) : '-'}
-                  </div>
-                  <span className="text-[8px] text-on-surface-variant/80 block mt-1 font-medium">Gold standard</span>
-                </div>
-                <div className="bg-surface-container-low hover:translate-y-[-2px] hover:shadow-md border border-outline-border/60 rounded-default p-3.5 text-center transition-all duration-300 shadow-sm cursor-default">
-                  <div className="text-[9px] text-secondary uppercase font-extrabold tracking-wider mb-1.5 font-outfit">NMI Score</div>
-                  <div className="text-xl sm:text-2xl font-mono text-secondary font-extrabold">
-                    {model.scoreNMI !== undefined && model.scoreNMI !== null ? model.scoreNMI.toFixed(3) : '-'}
-                  </div>
-                  <span className="text-[8px] text-on-surface-variant/80 block mt-1 font-medium">Cluster agreement</span>
-                </div>
-                <div className="bg-surface-container-low hover:translate-y-[-2px] hover:shadow-md border border-outline-border/60 rounded-default p-3.5 text-center transition-all duration-300 shadow-sm cursor-default">
-                  <div className="text-[9px] text-tertiary uppercase font-extrabold tracking-wider mb-1.5 font-outfit">Silhouette</div>
-                  <div className="text-xl sm:text-2xl font-mono text-tertiary font-extrabold">
-                    {model.scoreSilhouette !== undefined && model.scoreSilhouette !== null ? model.scoreSilhouette.toFixed(3) : '-'}
-                  </div>
-                  <span className="text-[8px] text-on-surface-variant/80 block mt-1 font-medium">Cluster compact</span>
-                </div>
-                <div className={`bg-surface-container-low hover:translate-y-[-2px] hover:shadow-md border border-outline-border/60 rounded-default p-3.5 text-center transition-all duration-300 shadow-sm cursor-default ${model.scoreAMI === undefined || model.scoreAMI === null ? 'opacity-40' : ''}`}>
-                  <div className="text-[9px] text-emerald-600 dark:text-emerald-400 uppercase font-extrabold tracking-wider mb-1.5 font-outfit">AMI Score</div>
-                  <div className="text-xl sm:text-2xl font-mono text-emerald-600 dark:text-emerald-400 font-extrabold">
-                    {model.scoreAMI !== undefined && model.scoreAMI !== null ? model.scoreAMI.toFixed(3) : '-'}
-                  </div>
-                  <span className="text-[8px] text-on-surface-variant/80 block mt-1 font-medium">Robust mutual info</span>
-                </div>
-                <div className={`bg-surface-container-low hover:translate-y-[-2px] hover:shadow-md border border-outline-border/60 rounded-default p-3.5 text-center transition-all duration-300 shadow-sm cursor-default ${model.scoreHomogeneity === undefined || model.scoreHomogeneity === null ? 'opacity-40' : ''}`}>
-                  <div className="text-[9px] text-amber-600 dark:text-amber-500 uppercase font-extrabold tracking-wider mb-1.5 font-outfit">Homogeneity</div>
-                  <div className="text-xl sm:text-2xl font-mono text-amber-600 dark:text-amber-500 font-extrabold">
-                    {model.scoreHomogeneity !== undefined && model.scoreHomogeneity !== null ? model.scoreHomogeneity.toFixed(3) : '-'}
-                  </div>
-                  <span className="text-[8px] text-on-surface-variant/80 block mt-1 font-medium">Purity score</span>
-                </div>
-                <div className={`bg-surface-container-low hover:translate-y-[-2px] hover:shadow-md border border-outline-border/60 rounded-default p-3.5 text-center transition-all duration-300 shadow-sm cursor-default ${model.scoreVMeasure === undefined || model.scoreVMeasure === null ? 'opacity-40' : ''}`}>
-                  <div className="text-[9px] text-purple-600 dark:text-purple-400 uppercase font-extrabold tracking-wider mb-1.5 font-outfit">V-Measure</div>
-                  <div className="text-xl sm:text-2xl font-mono text-purple-600 dark:text-purple-400 font-extrabold">
-                    {model.scoreVMeasure !== undefined && model.scoreVMeasure !== null ? model.scoreVMeasure.toFixed(3) : '-'}
-                  </div>
-                  <span className="text-[8px] text-on-surface-variant/80 block mt-1 font-medium">Completeness bal</span>
+
+              {/* Cluster Size Evaluations List */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-variant font-outfit flex items-center gap-1">
+                  <Layers className="h-4 w-4 text-primary" />
+                  Cluster Size Evaluations
+                </h3>
+                <div className="grid grid-cols-1 gap-4">
+                  {(model.results && model.results.length > 0 ? model.results : [{
+                    clusterSize: model.clusterSize,
+                    scoreARI: model.scoreARI,
+                    scoreNMI: model.scoreNMI,
+                    scoreSilhouette: model.scoreSilhouette,
+                    scoreAMI: model.scoreAMI,
+                    scoreHomogeneity: model.scoreHomogeneity,
+                    scoreVMeasure: model.scoreVMeasure
+                  }]).map((res, index) => (
+                    <div key={index} className="bg-surface-container-low border border-outline-border/60 rounded-default p-4.5 space-y-4 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-center border-b border-outline-border/40 pb-2">
+                        <span className="text-xs font-bold text-primary font-outfit uppercase tracking-wider">
+                          Evaluation Config: {res.clusterSize} Clusters
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 w-full">
+                        <div className="bg-surface-container-lowest border border-outline-border/60 rounded-default p-3 text-center">
+                          <div className="text-[9px] text-primary uppercase font-extrabold tracking-wider mb-1 font-outfit">ARI Score</div>
+                          <div className="text-lg font-mono text-primary font-extrabold">
+                            {res.scoreARI !== undefined && res.scoreARI !== null ? res.scoreARI.toFixed(3) : '-'}
+                          </div>
+                        </div>
+
+                        <div className="bg-surface-container-lowest border border-outline-border/60 rounded-default p-3 text-center">
+                          <div className="text-[9px] text-secondary uppercase font-extrabold tracking-wider mb-1 font-outfit">NMI Score</div>
+                          <div className="text-lg font-mono text-secondary font-extrabold">
+                            {res.scoreNMI !== undefined && res.scoreNMI !== null ? res.scoreNMI.toFixed(3) : '-'}
+                          </div>
+                        </div>
+
+                        <div className="bg-surface-container-lowest border border-outline-border/60 rounded-default p-3 text-center">
+                          <div className="text-[9px] text-tertiary uppercase font-extrabold tracking-wider mb-1 font-outfit">Silhouette</div>
+                          <div className="text-lg font-mono text-tertiary font-extrabold">
+                            {res.scoreSilhouette !== undefined && res.scoreSilhouette !== null ? res.scoreSilhouette.toFixed(3) : '-'}
+                          </div>
+                        </div>
+
+                        <div className={`bg-surface-container-lowest border border-outline-border/60 rounded-default p-3 text-center ${res.scoreAMI === undefined || res.scoreAMI === null ? 'opacity-40' : ''}`}>
+                          <div className="text-[9px] text-emerald-600 dark:text-emerald-400 uppercase font-extrabold tracking-wider mb-1 font-outfit">AMI Score</div>
+                          <div className="text-lg font-mono text-emerald-600 dark:text-emerald-400 font-extrabold">
+                            {res.scoreAMI !== undefined && res.scoreAMI !== null ? res.scoreAMI.toFixed(3) : '-'}
+                          </div>
+                        </div>
+
+                        <div className={`bg-surface-container-lowest border border-outline-border/60 rounded-default p-3 text-center ${res.scoreHomogeneity === undefined || res.scoreHomogeneity === null ? 'opacity-40' : ''}`}>
+                          <div className="text-[9px] text-amber-600 dark:text-amber-500 uppercase font-extrabold tracking-wider mb-1 font-outfit">Homogeneity</div>
+                          <div className="text-lg font-mono text-amber-600 dark:text-amber-500 font-extrabold">
+                            {res.scoreHomogeneity !== undefined && res.scoreHomogeneity !== null ? res.scoreHomogeneity.toFixed(3) : '-'}
+                          </div>
+                        </div>
+
+                        <div className={`bg-surface-container-lowest border border-outline-border/60 rounded-default p-3 text-center ${res.scoreVMeasure === undefined || res.scoreVMeasure === null ? 'opacity-40' : ''}`}>
+                          <div className="text-[9px] text-purple-600 dark:text-purple-400 uppercase font-extrabold tracking-wider mb-1 font-outfit">V-Measure</div>
+                          <div className="text-lg font-mono text-purple-600 dark:text-purple-400 font-extrabold">
+                            {res.scoreVMeasure !== undefined && res.scoreVMeasure !== null ? res.scoreVMeasure.toFixed(3) : '-'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -469,7 +564,7 @@ export default function ModelDetail() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Model Name</label>
                 <input 
@@ -542,123 +637,154 @@ export default function ModelDetail() {
                   </div>
                 )}
               </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Number of Clusters</label>
-                <input 
-                  type="number" 
-                  name="clusterSize" 
-                  value={editData.clusterSize} 
-                  onChange={handleEditChange} 
-                  required
-                  min="1"
-                  className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-semibold font-mono"
-                />
-              </div>
             </div>
 
-            {/* Performance Metrics Block in Edit Mode */}
-            <div className="bg-surface-container-low/40 p-4 rounded-default border border-outline-border/60 space-y-6">
-              <div>
+            {/* Edit Evaluations Section */}
+            <div className="space-y-6">
+              <div className="flex justify-between items-center border-b border-outline-border/60 pb-2">
                 <h3 className="text-sm font-bold text-on-surface font-outfit flex items-center gap-1.5">
                   <span className="w-1.5 h-4.5 bg-primary rounded-full inline-block"></span>
-                  Primary Performance Metrics (At least 2 required)
+                  Cluster Size Evaluations ({editResults.length})
                 </h3>
-                <p className="text-xs text-on-surface-variant/80 mt-1">
-                  You must provide at least two of the primary metrics (ARI, NMI, Silhouette) for your changes to be saved.
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">ARI Score</label>
-                  <input 
-                    type="number" 
-                    step="0.0001" 
-                    name="scoreARI" 
-                    value={editData.scoreARI} 
-                    onChange={handleEditChange} 
-                    className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
-                  />
-                  <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Gold standard with GT labels</span>
-                </div>
-                
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">NMI Score</label>
-                  <input 
-                    type="number" 
-                    step="0.0001" 
-                    name="scoreNMI" 
-                    value={editData.scoreNMI} 
-                    onChange={handleEditChange} 
-                    className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
-                  />
-                  <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Cluster agreement</span>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Silhouette Score</label>
-                  <input 
-                    type="number" 
-                    step="0.0001" 
-                    name="scoreSilhouette" 
-                    value={editData.scoreSilhouette} 
-                    onChange={handleEditChange} 
-                    className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
-                  />
-                  <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Cluster compactness</span>
-                </div>
+                <button
+                  type="button"
+                  onClick={handleAddEditResult}
+                  className="inline-flex items-center gap-1.5 bg-primary-container hover:bg-primary-container/90 text-white font-bold px-3 py-1.5 rounded-default text-xs cursor-pointer transition-colors shadow-sm"
+                >
+                  + Add Cluster Evaluation
+                </button>
               </div>
 
-              <div className="border-t border-outline-border/40 pt-4">
-                <h3 className="text-sm font-bold text-on-surface font-outfit flex items-center gap-1.5 mb-1">
-                  <span className="w-1.5 h-4.5 bg-secondary rounded-full inline-block"></span>
-                  Secondary Benchmarks (Optional)
-                </h3>
-                <p className="text-xs text-on-surface-variant/80 mb-4">
-                  Additional multi-omics parameters useful for profiling.
-                </p>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">AMI Score</label>
-                    <input 
-                      type="number" 
-                      step="0.0001" 
-                      name="scoreAMI" 
-                      value={editData.scoreAMI} 
-                      onChange={handleEditChange} 
-                      className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
-                    />
-                    <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Robust mutual info</span>
-                  </div>
+              <div className="space-y-6">
+                {editResults.map((res, index) => (
+                  <div key={index} className="bg-surface-container-low/30 p-5 rounded-default border border-outline-border/60 relative space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-bold text-primary font-outfit uppercase tracking-wider">
+                        Evaluation #{index + 1}
+                      </span>
+                      {editResults.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveEditResult(index)}
+                          className="inline-flex items-center gap-1 text-xs text-error hover:text-error/85 font-bold bg-transparent cursor-pointer"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Remove
+                        </button>
+                      )}
+                    </div>
 
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Homogeneity</label>
-                    <input 
-                      type="number" 
-                      step="0.0001" 
-                      name="scoreHomogeneity" 
-                      value={editData.scoreHomogeneity} 
-                      onChange={handleEditChange} 
-                      className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
-                    />
-                    <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Purity score</span>
-                  </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Number of Clusters</label>
+                        <input 
+                          type="number" 
+                          placeholder="e.g. 9"
+                          value={res.clusterSize} 
+                          onChange={(e) => handleEditResultChange(index, 'clusterSize', e.target.value)} 
+                          required
+                          min="1"
+                          className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-semibold font-mono"
+                        />
+                      </div>
+                    </div>
 
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">V-Measure</label>
-                    <input 
-                      type="number" 
-                      step="0.0001" 
-                      name="scoreVMeasure" 
-                      value={editData.scoreVMeasure} 
-                      onChange={handleEditChange} 
-                      className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
-                    />
-                    <span className="text-[10px] text-on-surface-variant/75 mt-1 block">Completeness balance</span>
+                    <div className="border-t border-outline-border/40 pt-4 space-y-4">
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-on-surface font-outfit">
+                          Primary Performance Metrics (At least 2 required)
+                        </h4>
+                        <p className="text-[10px] text-on-surface-variant/80 mt-0.5">
+                          Provide at least two of ARI, NMI, or Silhouette.
+                        </p>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">ARI Score</label>
+                          <input 
+                            type="number" 
+                            step="0.0001" 
+                            placeholder="0.000"
+                            value={res.scoreARI} 
+                            onChange={(e) => handleEditResultChange(index, 'scoreARI', e.target.value)} 
+                            className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">NMI Score</label>
+                          <input 
+                            type="number" 
+                            step="0.0001" 
+                            placeholder="0.000"
+                            value={res.scoreNMI} 
+                            onChange={(e) => handleEditResultChange(index, 'scoreNMI', e.target.value)} 
+                            className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Silhouette Score</label>
+                          <input 
+                            type="number" 
+                            step="0.0001" 
+                            placeholder="0.000"
+                            value={res.scoreSilhouette} 
+                            onChange={(e) => handleEditResultChange(index, 'scoreSilhouette', e.target.value)} 
+                            className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-outline-border/40 pt-4 space-y-4">
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-on-surface font-outfit">
+                          Secondary Benchmarks (Optional)
+                        </h4>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">AMI Score</label>
+                          <input 
+                            type="number" 
+                            step="0.0001" 
+                            placeholder="0.000"
+                            value={res.scoreAMI} 
+                            onChange={(e) => handleEditResultChange(index, 'scoreAMI', e.target.value)} 
+                            className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">Homogeneity</label>
+                          <input 
+                            type="number" 
+                            step="0.0001" 
+                            placeholder="0.000"
+                            value={res.scoreHomogeneity} 
+                            onChange={(e) => handleEditResultChange(index, 'scoreHomogeneity', e.target.value)} 
+                            className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">V-Measure</label>
+                          <input 
+                            type="number" 
+                            step="0.0001" 
+                            placeholder="0.000"
+                            value={res.scoreVMeasure} 
+                            onChange={(e) => handleEditResultChange(index, 'scoreVMeasure', e.target.value)} 
+                            className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-mono"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
 

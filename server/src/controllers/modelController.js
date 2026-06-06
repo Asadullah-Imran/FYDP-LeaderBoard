@@ -29,13 +29,7 @@ const createModel = async (req, res) => {
   const { 
     name, 
     datasetSectionId, 
-    scoreARI, 
-    scoreNMI, 
-    scoreSilhouette,
-    scoreAMI,
-    scoreHomogeneity,
-    scoreVMeasure,
-    clusterSize,
+    results,
     descriptionMarkdown, 
     methodologyImages, 
     architectureFlow, 
@@ -43,17 +37,21 @@ const createModel = async (req, res) => {
   } = req.body;
 
   try {
+    const modelResults = Array.isArray(results) ? results.map(res => ({
+      clusterSize: res.clusterSize !== undefined && res.clusterSize !== '' ? parseInt(res.clusterSize) : undefined,
+      scoreARI: res.scoreARI !== undefined && res.scoreARI !== '' ? parseFloat(res.scoreARI) : undefined,
+      scoreNMI: res.scoreNMI !== undefined && res.scoreNMI !== '' ? parseFloat(res.scoreNMI) : undefined,
+      scoreSilhouette: res.scoreSilhouette !== undefined && res.scoreSilhouette !== '' ? parseFloat(res.scoreSilhouette) : undefined,
+      scoreAMI: res.scoreAMI !== undefined && res.scoreAMI !== '' ? parseFloat(res.scoreAMI) : undefined,
+      scoreHomogeneity: res.scoreHomogeneity !== undefined && res.scoreHomogeneity !== '' ? parseFloat(res.scoreHomogeneity) : undefined,
+      scoreVMeasure: res.scoreVMeasure !== undefined && res.scoreVMeasure !== '' ? parseFloat(res.scoreVMeasure) : undefined,
+    })) : [];
+
     const model = new ModelSubmission({
       name,
       authorId: req.user._id,
       datasetSectionId,
-      scoreARI: scoreARI !== undefined && scoreARI !== '' ? parseFloat(scoreARI) : undefined,
-      scoreNMI: scoreNMI !== undefined && scoreNMI !== '' ? parseFloat(scoreNMI) : undefined,
-      scoreSilhouette: scoreSilhouette !== undefined && scoreSilhouette !== '' ? parseFloat(scoreSilhouette) : undefined,
-      scoreAMI: scoreAMI !== undefined && scoreAMI !== '' ? parseFloat(scoreAMI) : undefined,
-      scoreHomogeneity: scoreHomogeneity !== undefined && scoreHomogeneity !== '' ? parseFloat(scoreHomogeneity) : undefined,
-      scoreVMeasure: scoreVMeasure !== undefined && scoreVMeasure !== '' ? parseFloat(scoreVMeasure) : undefined,
-      clusterSize: clusterSize !== undefined && clusterSize !== '' ? parseInt(clusterSize) : undefined,
+      results: modelResults,
       descriptionMarkdown,
       methodologyImages,
       architectureFlow,
@@ -95,13 +93,7 @@ const updateModel = async (req, res) => {
   const { 
     name, 
     datasetSectionId, 
-    scoreARI, 
-    scoreNMI, 
-    scoreSilhouette,
-    scoreAMI,
-    scoreHomogeneity,
-    scoreVMeasure,
-    clusterSize,
+    results,
     descriptionMarkdown, 
     methodologyImages, 
     architectureFlow, 
@@ -119,13 +111,19 @@ const updateModel = async (req, res) => {
 
       model.name = name || model.name;
       model.datasetSectionId = datasetSectionId || model.datasetSectionId;
-      model.scoreARI = scoreARI !== undefined ? (scoreARI !== '' ? parseFloat(scoreARI) : undefined) : model.scoreARI;
-      model.scoreNMI = scoreNMI !== undefined ? (scoreNMI !== '' ? parseFloat(scoreNMI) : undefined) : model.scoreNMI;
-      model.scoreSilhouette = scoreSilhouette !== undefined ? (scoreSilhouette !== '' ? parseFloat(scoreSilhouette) : undefined) : model.scoreSilhouette;
-      model.scoreAMI = scoreAMI !== undefined ? (scoreAMI !== '' ? parseFloat(scoreAMI) : undefined) : model.scoreAMI;
-      model.scoreHomogeneity = scoreHomogeneity !== undefined ? (scoreHomogeneity !== '' ? parseFloat(scoreHomogeneity) : undefined) : model.scoreHomogeneity;
-      model.scoreVMeasure = scoreVMeasure !== undefined ? (scoreVMeasure !== '' ? parseFloat(scoreVMeasure) : undefined) : model.scoreVMeasure;
-      model.clusterSize = clusterSize !== undefined ? (clusterSize !== '' ? parseInt(clusterSize) : undefined) : model.clusterSize;
+      
+      if (results !== undefined) {
+        model.results = Array.isArray(results) ? results.map(res => ({
+          clusterSize: res.clusterSize !== undefined && res.clusterSize !== '' ? parseInt(res.clusterSize) : undefined,
+          scoreARI: res.scoreARI !== undefined && res.scoreARI !== '' ? parseFloat(res.scoreARI) : undefined,
+          scoreNMI: res.scoreNMI !== undefined && res.scoreNMI !== '' ? parseFloat(res.scoreNMI) : undefined,
+          scoreSilhouette: res.scoreSilhouette !== undefined && res.scoreSilhouette !== '' ? parseFloat(res.scoreSilhouette) : undefined,
+          scoreAMI: res.scoreAMI !== undefined && res.scoreAMI !== '' ? parseFloat(res.scoreAMI) : undefined,
+          scoreHomogeneity: res.scoreHomogeneity !== undefined && res.scoreHomogeneity !== '' ? parseFloat(res.scoreHomogeneity) : undefined,
+          scoreVMeasure: res.scoreVMeasure !== undefined && res.scoreVMeasure !== '' ? parseFloat(res.scoreVMeasure) : undefined,
+        })) : [];
+      }
+
       model.descriptionMarkdown = descriptionMarkdown !== undefined ? descriptionMarkdown : model.descriptionMarkdown;
       model.methodologyImages = methodologyImages || model.methodologyImages;
       model.architectureFlow = architectureFlow !== undefined ? architectureFlow : model.architectureFlow;

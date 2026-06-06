@@ -1,5 +1,15 @@
 const mongoose = require('mongoose');
 
+const clusterResultSchema = new mongoose.Schema({
+  clusterSize: { type: Number, required: true },
+  scoreARI: { type: Number },
+  scoreNMI: { type: Number },
+  scoreSilhouette: { type: Number },
+  scoreAMI: { type: Number },
+  scoreHomogeneity: { type: Number },
+  scoreVMeasure: { type: Number },
+}, { _id: false });
+
 const modelSubmissionSchema = new mongoose.Schema({
   name: { type: String, required: true }, // e.g., "SpatialGlue", "spaLLM"
   
@@ -15,15 +25,21 @@ const modelSubmissionSchema = new mongoose.Schema({
     required: true 
   },
   
-  // Performance Metrics
+  // Multiple evaluations by cluster size
+  results: {
+    type: [clusterResultSchema],
+    required: true,
+    validate: [v => Array.isArray(v) && v.length > 0, 'At least one cluster size result is required']
+  },
+
+  // Legacy Fields (kept for backward compatibility with older database submissions)
   scoreARI: { type: Number },
   scoreNMI: { type: Number },
   scoreSilhouette: { type: Number },
   scoreAMI: { type: Number },
   scoreHomogeneity: { type: Number },
   scoreVMeasure: { type: Number },
-  
-  clusterSize: { type: Number, required: true },
+  clusterSize: { type: Number },
   
   // Parsed Artifacts & Uploads
   descriptionMarkdown: { type: String, required: true }, // Markdown + LaTeX content
@@ -33,25 +49,56 @@ const modelSubmissionSchema = new mongoose.Schema({
   
 }, { timestamps: true });
 
-modelSubmissionSchema.pre('validate', function() {
-  // Clear out any nulls or empty strings
-  if (this.scoreARI === null || this.scoreARI === '') this.scoreARI = undefined;
-  if (this.scoreNMI === null || this.scoreNMI === '') this.scoreNMI = undefined;
-  if (this.scoreSilhouette === null || this.scoreSilhouette === '') this.scoreSilhouette = undefined;
-  if (this.scoreAMI === null || this.scoreAMI === '') this.scoreAMI = undefined;
-  if (this.scoreHomogeneity === null || this.scoreHomogeneity === '') this.scoreHomogeneity = undefined;
-  if (this.scoreVMeasure === null || this.scoreVMeasure === '') this.scoreVMeasure = undefined;
-
-  let count = 0;
-  if (typeof this.scoreARI === 'number' && !isNaN(this.scoreARI)) count++;
-  if (typeof this.scoreNMI === 'number' && !isNaN(this.scoreNMI)) count++;
-  if (typeof this.scoreSilhouette === 'number' && !isNaN(this.scoreSilhouette)) count++;
-
-  if (count < 2) {
-    throw new Error('Validation failed: You must provide at least two of the primary metrics (ARI, NMI, Silhouette).');
+// Backward compatibility fallback on loading legacy documents
+modelSubmissionSchema.post('init', function(doc) {
+  if ((!doc.results || doc.results.length === 0) && doc.clusterSize !== undefined) {
+    doc.results = [{
+      clusterSize: doc.clusterSize,
+      scoreARI: doc.scoreARI,
+      scoreNMI: doc.scoreNMI,
+      scoreSilhouette: doc.scoreSilhouette,
+      scoreAMI: doc.scoreAMI,
+      scoreHomogeneity: doc.scoreHomogeneity,
+      scoreVMeasure: doc.scoreVMeasure
+    }];
   }
+});
+
+modelSubmissionSchema.pre('validate', function() {
+  if (!this.results || this.results.length === 0) {
+    throw new Error('Validation failed: You must provide at least one cluster size result.');
+  }
+
+  const seenClusterSizes = new Set();
+  this.results.forEach((res) => {
+    // Clear out any nulls or empty strings
+    if (res.scoreARI === null || res.scoreARI === '') res.scoreARI = undefined;
+    if (res.scoreNMI === null || res.scoreNMI === '') res.scoreNMI = undefined;
+    if (res.scoreSilhouette === null || res.scoreSilhouette === '') res.scoreSilhouette = undefined;
+    if (res.scoreAMI === null || res.scoreAMI === '') res.scoreAMI = undefined;
+    if (res.scoreHomogeneity === null || res.scoreHomogeneity === '') res.scoreHomogeneity = undefined;
+    if (res.scoreVMeasure === null || res.scoreVMeasure === '') res.scoreVMeasure = undefined;
+
+    if (!res.clusterSize || isNaN(res.clusterSize) || res.clusterSize <= 0) {
+      throw new Error('Validation failed: Cluster size must be a valid positive integer.');
+    }
+    if (seenClusterSizes.has(res.clusterSize)) {
+      throw new Error(`Validation failed: Duplicate cluster size ${res.clusterSize} evaluation detected.`);
+    }
+    seenClusterSizes.add(res.clusterSize);
+
+    let count = 0;
+    if (typeof res.scoreARI === 'number' && !isNaN(res.scoreARI)) count++;
+    if (typeof res.scoreNMI === 'number' && !isNaN(res.scoreNMI)) count++;
+    if (typeof res.scoreSilhouette === 'number' && !isNaN(res.scoreSilhouette)) count++;
+
+    if (count < 2) {
+      throw new Error(`Validation failed for cluster size ${res.clusterSize}: You must provide at least two of the primary metrics (ARI, NMI, Silhouette).`);
+    }
+  });
 });
 
 const ModelSubmission = mongoose.model('ModelSubmission', modelSubmissionSchema);
 module.exports = ModelSubmission;
+
 
