@@ -1,31 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Trophy, Medal, ArrowRight, Sparkles, AlertCircle, Cpu } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5050/api';
+import { useData } from '../context/DataContext';
 
 export default function Dashboard() {
-  const [sections, setSections] = useState([]);
-  const [models, setModels] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { sections, models, globalLoading: loading, fetchGlobalData } = useData();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [sectionsRes, modelsRes] = await Promise.all([
-          axios.get(`${API_URL}/sections`),
-          axios.get(`${API_URL}/models`)
-        ]);
-        setSections(sectionsRes.data);
-        setModels(modelsRes.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    fetchGlobalData();
   }, []);
 
   const nonEmptySections = sections.filter(section => 

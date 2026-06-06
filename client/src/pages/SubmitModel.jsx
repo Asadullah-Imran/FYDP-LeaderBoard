@@ -7,11 +7,13 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { usePopup } from '../context/PopupContext';
+import { useData } from '../context/DataContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5050/api';
 
 export default function SubmitModel() {
   const { showAlert } = usePopup();
+  const { clearCache } = useData();
   const [formData, setFormData] = useState({
     name: '',
     datasetSectionId: '',
@@ -204,6 +206,7 @@ export default function SubmitModel() {
         }
       });
       
+      clearCache();
       navigate('/');
     } catch (error) {
       console.error('Error submitting model:', error);

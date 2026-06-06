@@ -8,6 +8,7 @@ import 'katex/dist/katex.min.css';
 import mermaid from 'mermaid';
 import { useAuth } from '../context/AuthContext';
 import { usePopup } from '../context/PopupContext';
+import { useData } from '../context/DataContext';
 import { Edit2, Trash2, Check, X, Eye, Edit3, ChevronsUpDown, Search, Image, ArrowLeft, Cpu, Layers, BookOpen, AlertTriangle, Code, ExternalLink } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5050/api';
@@ -17,10 +18,18 @@ export default function ModelDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showAlert, showConfirm } = usePopup();
+  const { 
+    modelDetails, 
+    getModelDetail, 
+    updateModelInCache, 
+    deleteModelFromCache, 
+    fetchGlobalData, 
+    clearCache,
+    sections 
+  } = useData();
 
   const [model, setModel] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [sections, setSections] = useState([]);
   
   // Editing states
   const [isEditing, setIsEditing] = useState(false);
@@ -51,28 +60,39 @@ export default function ModelDetail() {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    const fetchModel = async () => {
-      try {
-        const { data } = await axios.get(`${API_URL}/models/${id}`);
-        setModel(data);
-      } catch (error) {
-        console.error('Error fetching model:', error);
-      } finally {
+    let active = true;
+
+    const loadData = async () => {
+      // If the model is already in cache, load it immediately so the user doesn't see a spinner
+      if (modelDetails[id]) {
+        setModel(modelDetails[id]);
         setLoading(false);
+      } else {
+        setLoading(true);
       }
-    };
-    
-    const fetchSections = async () => {
+
       try {
-        const { data } = await axios.get(`${API_URL}/sections`);
-        setSections(data);
+        // Fetch model detail (updates cache and returns data)
+        const modelData = await getModelDetail(id, true);
+        if (active) {
+          setModel(modelData);
+          setLoading(false);
+        }
+        
+        // Ensure sections are loaded (uses cache if available)
+        await fetchGlobalData();
       } catch (error) {
-        console.error('Error fetching sections:', error);
+        console.error('Error loading model details:', error);
+        if (active) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchModel();
-    fetchSections();
+    loadData();
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   useEffect(() => {
@@ -303,6 +323,7 @@ export default function ModelDetail() {
       });
 
       setModel(data);
+      updateModelInCache(data);
       setIsEditing(false);
       setImageFiles([]);
     } catch (error) {
@@ -331,6 +352,7 @@ export default function ModelDetail() {
           Authorization: `Bearer ${token}`
         }
       });
+      deleteModelFromCache(id);
       navigate('/');
     } catch (error) {
       console.error('Error deleting model:', error);

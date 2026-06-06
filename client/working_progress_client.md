@@ -89,6 +89,32 @@ This log tracks crucial functional updates and architectural additions made to t
   * **Auth-Protected Actions**: Configured dynamic header management displaying "Edit Model" and "Delete Model" buttons only when an authenticated user owns the submission (or has administrator privileges).
   * **Fullstack Integration**: Linked form changes and deletion requests directly to secure PUT and DELETE REST endpoints on the server using authorization bearer tokens.
 
+### 📅 June 7, 2026
+
+#### 1. ⚡ Incremental Dashboard Loading & Skeleton States
+* **[MODIFY]** Updated [Dashboard.jsx](src/pages/Dashboard.jsx):
+  * **Instantly Render Static Content**: Removed the global loading block that blocked the entire screen. The Hero banner, description, and title now render immediately on page mount.
+  * **Visual Skeleton Layout**: Implemented themed, shimmering loading skeletons mimicking the cards and tables of the leaderboard sections, keeping the UI engaged and active during the data fetch.
+
+#### 2. 🔐 Authentication Form Submission Loading States
+* **[MODIFY]** Updated [Login.jsx](src/pages/Login.jsx):
+  * **Form Submission Lock**: Added a `submitting` state that disables input fields (Name, Email, Password), the submit button, and the register/login toggle link during active API requests to prevent double-submissions.
+  * **Dynamic Button Feedback**: Injected a loading spinner inside the submit button that displays `Signing In...` (in Login mode) or `Registering...` (in Register mode) during processing.
+
+#### 3. 💾 Global Data Caching & Performance Optimizations
+* **[NEW]** Created [DataContext.jsx](src/context/DataContext.jsx):
+  * **Global Cache Store**: Implemented a centralized React Context managing global cache states for dataset sections list, models list, and detailed single-model objects.
+  * **Cache Management APIs**: Added functions to load cache on mount (`fetchGlobalData`), retrieve specific cached details (`getModelDetail`), clear cache state (`clearCache`), and update or delete specific cached elements in-place (`updateModelInCache`, `deleteModelFromCache`).
+* **[MODIFY]** Updated [App.jsx](src/App.jsx):
+  * Integrated the `DataProvider` into the core provider tree wrapping the application routes.
+* **[MODIFY]** Updated [Dashboard.jsx](src/pages/Dashboard.jsx):
+  * Linked sections and models states directly to the global `useData()` cache hook, making navigation back to the dashboard from detail views instantaneous with zero redundant backend database requests.
+* **[MODIFY]** Updated [ModelDetail.jsx](src/pages/ModelDetail.jsx):
+  * Added cache-first detail loading. If the model details exist in the cache, the page displays them **instantly** (eliminating the spinner lag), while re-verifying and updating in the background.
+  * Connected editing/deletion successes to the global cache context to trigger instant UI updates.
+* **[MODIFY]** Updated [SubmitModel.jsx](src/pages/SubmitModel.jsx):
+  * Configured form submission to automatically call `clearCache()` on success, forcing the next dashboard mount to query the database and pick up the new model submission.
+
 
 
 
