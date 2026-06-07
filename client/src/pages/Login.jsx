@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { usePopup } from '../context/PopupContext';
 import { Lock, Mail, User, ArrowRight, UserPlus } from 'lucide-react';
@@ -9,11 +9,15 @@ const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5050/api'}/
 
 export default function Login() {
   const { showAlert } = usePopup();
-  const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
-  const [submitting, setSubmitting] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
   const { login } = useAuth();
+  
+  const [isLogin, setIsLogin] = useState(() => {
+    return !(location.state?.register);
+  });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -27,7 +31,8 @@ export default function Login() {
       const { data } = await axios.post(`${API_URL}${endpoint}`, formData);
       
       login(data);
-      navigate('/');
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
     } catch (error) {
       console.error('Auth Error:', error);
       const errMsg = error.response?.data?.message || 'Authentication failed. Please verify credentials.';

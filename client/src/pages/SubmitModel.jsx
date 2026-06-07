@@ -11,6 +11,44 @@ import { useData } from '../context/DataContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5050/api';
 
+const parseRawMetrics = (text) => {
+  const regex = /(ari|nmi|ami|silhouette|silh|sil|homogeneity|homo|v-measure|vmeasure|v\s+measure|cluster\s+size|cluster_size|clusters?)\s*[:=\s]\s*([0-9.]+)/gi;
+  const result = {};
+  
+  const keyMapping = {
+    ari: 'scoreARI',
+    nmi: 'scoreNMI',
+    silhouette: 'scoreSilhouette',
+    silh: 'scoreSilhouette',
+    sil: 'scoreSilhouette',
+    ami: 'scoreAMI',
+    homogeneity: 'scoreHomogeneity',
+    homo: 'scoreHomogeneity',
+    'v-measure': 'scoreVMeasure',
+    vmeasure: 'scoreVMeasure',
+    'v measure': 'scoreVMeasure',
+    cluster: 'clusterSize',
+    clusters: 'clusterSize',
+    'cluster size': 'clusterSize',
+    'cluster_size': 'clusterSize',
+  };
+
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    const rawKey = match[1].toLowerCase().replace(/\s+/g, ' ');
+    const val = parseFloat(match[2]);
+    if (!isNaN(val)) {
+      for (const [key, field] of Object.entries(keyMapping)) {
+        if (rawKey === key || rawKey.includes(key)) {
+          result[field] = val;
+          break;
+        }
+      }
+    }
+  }
+  return result;
+};
+
 export default function SubmitModel() {
   const { showAlert } = usePopup();
   const { clearCache } = useData();
@@ -370,6 +408,23 @@ export default function SubmitModel() {
                         required
                         min="1"
                         className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-sm font-semibold font-mono"
+                      />
+                    </div>
+                    
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-primary mb-1.5 font-outfit">Quick Metrics Paste (Autofill)</label>
+                      <textarea
+                        rows={1}
+                        placeholder="Paste output (e.g. ARI: 0.1885 NMI: 0.3351) here to auto-fill..."
+                        className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 transition-all text-xs font-mono resize-none h-[38px] leading-tight"
+                        onChange={(e) => {
+                          const parsed = parseRawMetrics(e.target.value);
+                          if (Object.keys(parsed).length > 0) {
+                            Object.entries(parsed).forEach(([field, val]) => {
+                              handleResultChange(index, field, val.toString());
+                            });
+                          }
+                        }}
                       />
                     </div>
                   </div>

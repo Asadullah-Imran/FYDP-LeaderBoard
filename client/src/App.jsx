@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import ModelDetail from './pages/ModelDetail';
 import SubmitModel from './pages/SubmitModel';
@@ -30,16 +30,16 @@ function Navigation() {
             <span className="hidden sm:inline">Dashboard</span>
           </Link>
 
+          <Link 
+            to="/submit" 
+            className="hover:text-primary-container text-on-surface-variant transition-colors text-sm font-semibold flex items-center gap-1.5"
+          >
+            <PlusCircle className="h-4 w-4 shrink-0" />
+            <span className="hidden sm:inline">Submit Model</span>
+          </Link>
+
           {user && (
             <>
-              <Link 
-                to="/submit" 
-                className="hover:text-primary-container text-on-surface-variant transition-colors text-sm font-semibold flex items-center gap-1.5"
-              >
-                <PlusCircle className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline">Submit Model</span>
-              </Link>
-
               {user.role === 'admin' && (
                 <Link 
                   to="/admin" 
@@ -97,13 +97,15 @@ function Navigation() {
 // Protected Route Guard Wrapper
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
-  return user ? children : <Login />;
+  const location = useLocation();
+  return user ? children : <Navigate to="/login" replace state={{ from: location }} />;
 }
 
 // Admin Route Guard Wrapper
 function AdminRoute({ children }) {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
+  const location = useLocation();
+  if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
   return user.role === 'admin' ? children : <Navigate to="/" replace />;
 }
 
