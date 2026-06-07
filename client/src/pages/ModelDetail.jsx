@@ -240,7 +240,6 @@ export default function ModelDetail() {
 
   const handleAddEditResult = () => {
     setEditResults((prev) => [
-      ...prev,
       {
         clusterSize: '',
         scoreARI: '',
@@ -249,7 +248,8 @@ export default function ModelDetail() {
         scoreAMI: '',
         scoreHomogeneity: '',
         scoreVMeasure: ''
-      }
+      },
+      ...prev
     ]);
   };
 
@@ -398,6 +398,24 @@ export default function ModelDetail() {
     }
   };
 
+  const displayResults = model ? [...(model.results && model.results.length > 0 ? model.results : [{
+    clusterSize: model.clusterSize,
+    scoreARI: model.scoreARI,
+    scoreNMI: model.scoreNMI,
+    scoreSilhouette: model.scoreSilhouette,
+    scoreAMI: model.scoreAMI,
+    scoreHomogeneity: model.scoreHomogeneity,
+    scoreVMeasure: model.scoreVMeasure
+  }])].sort((a, b) => {
+    const ariA = a.scoreARI !== undefined && a.scoreARI !== null ? a.scoreARI : -1;
+    const ariB = b.scoreARI !== undefined && b.scoreARI !== null ? b.scoreARI : -1;
+    if (ariB !== ariA) return ariB - ariA;
+    
+    const silA = a.scoreSilhouette !== undefined && a.scoreSilhouette !== null ? a.scoreSilhouette : -1;
+    const silB = b.scoreSilhouette !== undefined && b.scoreSilhouette !== null ? b.scoreSilhouette : -1;
+    return silB - silA;
+  }) : [];
+
   const selectedSection = sections.find(s => s._id === editData.datasetSectionId);
   const filteredSections = sections.filter(section =>
     section.name.toLowerCase().includes(dropdownSearch.toLowerCase())
@@ -507,15 +525,7 @@ export default function ModelDetail() {
                   Cluster Size Evaluations
                 </h3>
                 <div className="grid grid-cols-1 gap-4">
-                  {(model.results && model.results.length > 0 ? model.results : [{
-                    clusterSize: model.clusterSize,
-                    scoreARI: model.scoreARI,
-                    scoreNMI: model.scoreNMI,
-                    scoreSilhouette: model.scoreSilhouette,
-                    scoreAMI: model.scoreAMI,
-                    scoreHomogeneity: model.scoreHomogeneity,
-                    scoreVMeasure: model.scoreVMeasure
-                  }]).map((res, index) => (
+                  {displayResults.map((res, index) => (
                     <div key={index} className="bg-surface-container-low border border-outline-border/60 rounded-default p-4.5 space-y-4 shadow-sm hover:shadow-md transition-shadow">
                       <div className="flex justify-between items-center border-b border-outline-border/40 pb-2">
                         <span className="text-xs font-bold text-primary font-outfit uppercase tracking-wider">

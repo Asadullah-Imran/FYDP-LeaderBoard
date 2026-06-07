@@ -123,7 +123,6 @@ export default function SubmitModel() {
 
   const handleAddResult = () => {
     setResults((prev) => [
-      ...prev,
       {
         clusterSize: '',
         scoreARI: '',
@@ -132,7 +131,8 @@ export default function SubmitModel() {
         scoreAMI: '',
         scoreHomogeneity: '',
         scoreVMeasure: ''
-      }
+      },
+      ...prev
     ]);
   };
 
