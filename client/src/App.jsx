@@ -22,15 +22,16 @@ function Navigation() {
           <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-primary-container animate-pulse"></span>
         </Link>
         <nav className="flex gap-2.5 sm:gap-4 md:gap-6 items-center font-medium">
+          <Link 
+            to="/" 
+            className="hover:text-primary-container text-on-surface-variant transition-colors text-sm font-semibold flex items-center gap-1.5"
+          >
+            <Database className="h-4 w-4 shrink-0" />
+            <span className="hidden sm:inline">Dashboard</span>
+          </Link>
+
           {user && (
             <>
-              <Link 
-                to="/" 
-                className="hover:text-primary-container text-on-surface-variant transition-colors text-sm font-semibold flex items-center gap-1.5"
-              >
-                <Database className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline">Dashboard</span>
-              </Link>
               <Link 
                 to="/submit" 
                 className="hover:text-primary-container text-on-surface-variant transition-colors text-sm font-semibold flex items-center gap-1.5"
@@ -118,9 +119,9 @@ function App() {
 
                 <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 md:px-8 py-8 overflow-auto">
                   <Routes>
-                    <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                    <Route path="/" element={<Dashboard />} />
                     <Route path="/submit" element={<ProtectedRoute><SubmitModel /></ProtectedRoute>} />
-                    <Route path="/models/:id" element={<ProtectedRoute><ModelDetail /></ProtectedRoute>} />
+                    <Route path="/models/:id" element={<ModelDetail />} />
                     <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
                     <Route path="/login" element={<Login />} />
                   </Routes>
