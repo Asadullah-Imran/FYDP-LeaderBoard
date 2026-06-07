@@ -196,10 +196,17 @@ export default function Dashboard() {
                 {/* Visual anchor bar */}
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-primary-container"></div>
                 
-                <h2 className="text-xl md:text-2xl font-bold text-on-surface mb-6 flex items-center gap-2.5 font-outfit">
-                  <span className="w-1.5 h-7 bg-primary-container rounded-full inline-block"></span>
-                  Dataset: {section.name}
-                </h2>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                  <h2 className="text-xl md:text-2xl font-bold text-on-surface flex items-center gap-2.5 font-outfit">
+                    <span className="w-1.5 h-7 bg-primary-container rounded-full inline-block"></span>
+                    Dataset: {section.name}
+                  </h2>
+                  {section.groundTruth !== undefined && section.groundTruth !== null && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-tertiary/10 border border-tertiary/20 rounded-full text-xs font-bold text-tertiary font-outfit uppercase shrink-0 w-fit">
+                      Ground Truth: {section.groundTruth} Clusters
+                    </span>
+                  )}
+                </div>
                 
                 <div className="overflow-x-auto rounded-default border border-outline-border bg-surface-container-lowest">
                   <table className="w-full text-left text-sm text-on-surface-variant border-collapse">

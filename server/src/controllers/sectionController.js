@@ -10,12 +10,13 @@ const getSections = async (req, res) => {
 };
 
 const createSection = async (req, res) => {
-  const { name, description } = req.body;
+  const { name, description, groundTruth } = req.body;
 
   try {
     const section = new DatasetSection({
       name,
-      description
+      description,
+      groundTruth
     });
 
     const createdSection = await section.save();

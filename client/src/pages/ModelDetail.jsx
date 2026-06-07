@@ -416,9 +416,14 @@ export default function ModelDetail() {
                   {model.name}
                 </h1>
                 <p className="text-sm text-on-surface-variant flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span>
+                  <span className="flex flex-wrap items-center gap-1">
                     Submitted by <span className="text-on-surface font-bold">{model.authorId?.name || 'Unknown'}</span> for dataset 
-                    <span className="text-primary font-bold ml-1">{model.datasetSectionId?.name || 'Deleted Section'}</span>
+                    <span className="text-primary font-bold">{model.datasetSectionId?.name || 'Deleted Section'}</span>
+                    {model.datasetSectionId?.groundTruth !== undefined && model.datasetSectionId?.groundTruth !== null && (
+                      <span className="ml-1.5 px-2 py-0.5 bg-tertiary-container/10 border border-tertiary-container/30 text-tertiary text-[10px] font-bold uppercase rounded-full tracking-wider font-outfit">
+                        Ground Truth: {model.datasetSectionId.groundTruth} Clusters
+                      </span>
+                    )}
                   </span>
                   {model.githubUrl && (
                     <>

@@ -43,7 +43,7 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('datasets');
   
   // Forms & Searches
-  const [newSection, setNewSection] = useState({ name: '', description: '' });
+  const [newSection, setNewSection] = useState({ name: '', description: '', groundTruth: '' });
   const [creatingSection, setCreatingSection] = useState(false);
   const [searchUser, setSearchUser] = useState('');
   const [searchModel, setSearchModel] = useState('');
@@ -97,9 +97,14 @@ export default function AdminPanel() {
     const headers = { Authorization: `Bearer ${token}` };
 
     try {
-      const { data } = await axios.post(`${API_URL}/sections`, newSection, { headers });
+      const payload = {
+        name: newSection.name,
+        description: newSection.description,
+        groundTruth: newSection.groundTruth ? parseInt(newSection.groundTruth) : undefined
+      };
+      const { data } = await axios.post(`${API_URL}/sections`, payload, { headers });
       setSections((prev) => [...prev, data]);
-      setNewSection({ name: '', description: '' });
+      setNewSection({ name: '', description: '', groundTruth: '' });
       showFeedback('success', `Dataset Section "${data.name}" created successfully!`);
     } catch (error) {
       console.error('Failed to create dataset section:', error);
@@ -458,6 +463,20 @@ export default function AdminPanel() {
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">
+                    Ground Truth (Optional Number of Clusters)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 10"
+                    value={newSection.groundTruth}
+                    onChange={(e) => setNewSection({ ...newSection, groundTruth: e.target.value })}
+                    className="w-full bg-surface-container-lowest border border-outline-border rounded-default px-3 py-2 text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm font-semibold font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5 font-outfit">
                     Description
                   </label>
                   <textarea
@@ -498,12 +517,19 @@ export default function AdminPanel() {
                     return (
                       <div key={section._id} className="py-4 first:pt-0 last:pb-0 flex justify-between items-start gap-4">
                         <div className="space-y-1">
-                          <h3 className="font-bold text-on-surface flex items-center gap-2 text-sm sm:text-base font-outfit">
-                            {section.name}
-                            <span className="inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold rounded-full bg-primary/10 border border-primary/20 text-primary">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-bold text-on-surface text-sm sm:text-base font-outfit">
+                              {section.name}
+                            </h3>
+                            <span className="inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold rounded-full bg-primary/10 border border-primary/20 text-primary shrink-0">
                               {sectionCount} {sectionCount === 1 ? 'model' : 'models'}
                             </span>
-                          </h3>
+                            {section.groundTruth !== undefined && section.groundTruth !== null && (
+                              <span className="inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold rounded-full bg-tertiary-container/10 border border-tertiary-container/30 text-tertiary shrink-0">
+                                GT: {section.groundTruth} Clusters
+                              </span>
+                            )}
+                          </div>
                           <p className="text-xs text-on-surface-variant leading-relaxed max-w-xl">
                             {section.description || 'No custom description provided for this dataset benchmark category.'}
                           </p>

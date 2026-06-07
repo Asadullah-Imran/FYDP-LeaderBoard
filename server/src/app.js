@@ -44,24 +44,29 @@ const connectDB = async () => {
 
     const DatasetSection = require("./models/DatasetSection");
     const defaultSections = [
-      "Human_Lymph_Node_A1",
-      "Human_Lymph_Node_D1",
-      "Mouse_Brain_ATAC",
-      "Mouse_Brain_H3K27ac",
-      "Mouse_Brain_H3K27me",
-      "Mouse_Brain_H3K4me",
-      "Mouse_Spleen",
-      "Mouse_Thymus",
+      { name: "Human_Lymph_Node_A1", groundTruth: 10 },
+      { name: "Human_Lymph_Node_D1", groundTruth: 11 },
+      { name: "Mouse_Brain_ATAC" },
+      { name: "Mouse_Brain_H3K27ac" },
+      { name: "Mouse_Brain_H3K27me" },
+      { name: "Mouse_Brain_H3K4me" },
+      { name: "Mouse_Spleen" },
+      { name: "Mouse_Thymus" },
     ];
 
-    for (const name of defaultSections) {
-      const exists = await DatasetSection.findOne({ name });
+    for (const sectionData of defaultSections) {
+      const exists = await DatasetSection.findOne({ name: sectionData.name });
       if (!exists) {
         await DatasetSection.create({
-          name,
-          description: `Performance benchmark leaderboard for dataset: ${name.replace(/_/g, " ")}`,
+          name: sectionData.name,
+          description: `Performance benchmark leaderboard for dataset: ${sectionData.name.replace(/_/g, " ")}`,
+          groundTruth: sectionData.groundTruth,
         });
-        console.log(`Seeded dataset section: ${name}`);
+        console.log(`Seeded dataset section: ${sectionData.name}`);
+      } else if (sectionData.groundTruth !== undefined && exists.groundTruth !== sectionData.groundTruth) {
+        exists.groundTruth = sectionData.groundTruth;
+        await exists.save();
+        console.log(`Updated dataset section ${sectionData.name} with groundTruth: ${sectionData.groundTruth}`);
       }
     }
 
